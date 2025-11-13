@@ -17,12 +17,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useThemeColor } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/src/hooks/useThemeColor";
 import {
   getAccountStatement,
   type AccountStatementEntry,
-} from "@/services/firebase";
-import { formatCurrency } from "@/utils/currency";
+} from "@/src/services/firebase";
+import { formatCurrency } from "@/src/utils/currency";
 
 const PAGE_SIZE = 10;
 

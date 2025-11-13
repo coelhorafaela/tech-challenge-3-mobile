@@ -1,4 +1,4 @@
-import { Colors } from '@/constants/Colors';
+import { Colors } from '@/src/constants/Colors';
 import { useColorScheme } from './useColorScheme';
 
 export function useThemeColor(

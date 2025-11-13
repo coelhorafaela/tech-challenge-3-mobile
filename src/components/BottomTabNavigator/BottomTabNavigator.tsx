@@ -1,7 +1,7 @@
-import { useThemeColor } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/src/hooks/useThemeColor";
 import { StyleSheet, Text, View } from "react-native";
 
-import { HomeTabContent } from "@/components/Home";
+import { HomeTabContent } from "@/src/components/Home";
 import { Dashboard } from '../Dashboard';
 import { StatementTabContent } from "./StatementTabContent";
 import { TabBar } from "./TabBar";

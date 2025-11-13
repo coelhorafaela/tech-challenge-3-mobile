@@ -5,11 +5,11 @@ import { useCallback, useState } from "react";
 import { ActivityIndicator, Text as RNText, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { RecentTransactions } from "@/components/Home/RecentTransactions";
-import { useAccount } from "@/hooks/useAccount";
-import { useAuth } from "@/hooks/useAuth";
-import { useCards } from "@/hooks/useCards";
-import { formatCurrency, formatCurrencyFromNumber } from "@/utils/currency";
+import { RecentTransactions } from "@/src/components/Home/RecentTransactions";
+import { useAccount } from "@/src/hooks/useAccount";
+import { useAuth } from "@/src/hooks/useAuth";
+import { useCards } from "@/src/hooks/useCards";
+import { formatCurrency, formatCurrencyFromNumber } from "@/src/utils/currency";
 
 export function HomeTabContent() {
   const [balanceVisible, setBalanceVisible] = useState(true);

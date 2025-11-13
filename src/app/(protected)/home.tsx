@@ -1,4 +1,4 @@
-import { BottomTabNavigator } from "@/components/BottomTabNavigator";
+import { BottomTabNavigator } from "@/src/components/BottomTabNavigator";
 import { useState } from "react";
 
 export default function HomeScreen() {

@@ -7,10 +7,10 @@ import { useMemo, useState } from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { SegmentControl } from '@/components/SegmentControl';
-import { useAccount } from '@/hooks/useAccount';
-import { bankingApi, type TransactionType } from '@/services/bankingApi';
-import { formatCurrency } from '@/utils/currency';
+import { SegmentControl } from '@/src/components/SegmentControl';
+import { useAccount } from '@/src/hooks/useAccount';
+import { bankingApi, type TransactionType } from '@/src/services/bankingApi';
+import { formatCurrency } from '@/src/utils/currency';
 
 export type TransactionTypeOption = {
   value: TransactionType;

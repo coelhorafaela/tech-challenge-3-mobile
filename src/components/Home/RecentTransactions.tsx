@@ -6,12 +6,12 @@ import {
   View,
 } from "react-native";
 
-import { SegmentControl } from "@/components/SegmentControl";
+import { SegmentControl } from "@/src/components/SegmentControl";
 import {
   TransactionItem as TransactionItemComponent,
   TransactionItemProps,
-} from "@/components/TransactionItem";
-import { bankingApi, type Transaction } from "@/services/bankingApi";
+} from "@/src/components/TransactionItem";
+import { bankingApi, type Transaction } from "@/src/services/bankingApi";
 
 type TabKey = "income" | "expense";
 

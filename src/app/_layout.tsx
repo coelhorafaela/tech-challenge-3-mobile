@@ -1,9 +1,9 @@
+import { AccountProvider } from "@/src/hooks/useAccount";
+import { AuthProvider } from "@/src/hooks/useAuth";
+import { CardProvider } from "@/src/hooks/useCards";
 import { Stack } from "expo-router";
-import { AccountProvider } from "../hooks/useAccount";
-import { AuthProvider } from "../hooks/useAuth";
-import { CardProvider } from "../hooks/useCards";
 
-import "@/services/firebase";
+import "@/src/services/firebase";
 
 export default function RootLayout() {
   return (

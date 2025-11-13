@@ -1,4 +1,4 @@
-import { bankingApi, type Transaction, type YearlyTransactionsResponse } from '@/services/bankingApi';
+import { bankingApi, type Transaction, type YearlyTransactionsResponse } from '@/src/services/bankingApi';
 import { useEffect, useState } from 'react';
 
 type MonthlyData = {

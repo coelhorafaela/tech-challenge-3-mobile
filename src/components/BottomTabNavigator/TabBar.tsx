@@ -1,4 +1,4 @@
-import { useThemeColor } from "@/hooks/useThemeColor";
+import { useThemeColor } from "@/src/hooks/useThemeColor";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import Animated, {
   useAnimatedStyle,

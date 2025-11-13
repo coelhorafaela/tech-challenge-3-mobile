@@ -1,5 +1,5 @@
-import { useThemeColor } from "@/hooks/useThemeColor";
-import { useYearlyTransactions } from "@/hooks/useTransactions";
+import { useThemeColor } from "@/src/hooks/useThemeColor";
+import { useYearlyTransactions } from "@/src/hooks/useTransactions";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,

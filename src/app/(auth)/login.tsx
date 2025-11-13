@@ -1,7 +1,7 @@
-import Toast from "@/components/Toast";
-import { ROUTE_PROTECTED_HOME } from "@/constants/routes";
-import { useAuth } from "@/hooks/useAuth";
-import { validateLoginForm, validateRegisterForm } from "@/utils/validation";
+import Toast from "@/src/components/Toast";
+import { ROUTE_PROTECTED_HOME } from "@/src/constants/routes";
+import { useAuth } from "@/src/hooks/useAuth";
+import { validateLoginForm, validateRegisterForm } from "@/src/utils/validation";
 import { Ionicons } from "@expo/vector-icons";
 import { Redirect } from "expo-router";
 import { StatusBar } from "expo-status-bar";

@@ -1,30 +1,34 @@
-import { Redirect } from "expo-router";
-import { ActivityIndicator, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
-import { useAuth } from "@/hooks/useAuth";
-import { ROUTE_AUTH_LOGIN, ROUTE_PROTECTED_HOME } from "@/constants/routes";
-
-export default function Index() {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#F5F6FA",
-        }}
-      >
-        <ActivityIndicator size="large" color="#294FC1" />
-      </View>
-    );
-  }
-
+export default function Page() {
   return (
-    <Redirect
-      href={isAuthenticated ? ROUTE_PROTECTED_HOME : ROUTE_AUTH_LOGIN}
-    />
+    <View style={styles.container}>
+      <View style={styles.main}>
+        <Text style={styles.title}>Hello World</Text>
+        <Text style={styles.subtitle}>This is the first page of your app.</Text>
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    padding: 24,
+  },
+  main: {
+    flex: 1,
+    justifyContent: "center",
+    maxWidth: 960,
+    marginHorizontal: "auto",
+  },
+  title: {
+    fontSize: 64,
+    fontWeight: "bold",
+  },
+  subtitle: {
+    fontSize: 36,
+    color: "#38434D",
+  },
+});

@@ -1,17 +1,17 @@
 import {
   TransactionItem,
   type TransactionItemProps,
-} from "@/components/TransactionItem";
-import { ROUTE_AUTH_LOGIN } from "@/constants/routes";
-import { useAuth } from "@/hooks/useAuth";
-import { useCards } from "@/hooks/useCards";
+} from "@/src/components/TransactionItem";
+import { ROUTE_AUTH_LOGIN } from "@/src/constants/routes";
+import { useAuth } from "@/src/hooks/useAuth";
+import { useCards } from "@/src/hooks/useCards";
 import {
   type PaymentCard,
   type PaymentCardTransaction,
   type PaymentCardType,
   getPaymentCardTransactions,
-} from "@/services/firebase";
-import { formatCurrencyFromNumber } from "@/utils/currency";
+} from "@/src/services/firebase";
+import { formatCurrencyFromNumber } from "@/src/utils/currency";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";

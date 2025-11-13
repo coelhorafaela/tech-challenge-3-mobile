@@ -2,13 +2,13 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Alert, Platform, StyleSheet, TouchableOpacity } from 'react-native';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { healthCheck } from '@/services/firebase';
+import { HelloWave } from '@/src/components/HelloWave';
+import ParallaxScrollView from '@/src/components/ParallaxScrollView';
+import { ThemedText } from '@/src/components/ThemedText';
+import { ThemedView } from '@/src/components/ThemedView';
+import { Colors } from '@/src/constants/Colors';
+import { useColorScheme } from '@/src/hooks/useColorScheme';
+import { healthCheck } from '@/src/services/firebase';
 
 export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(false);
