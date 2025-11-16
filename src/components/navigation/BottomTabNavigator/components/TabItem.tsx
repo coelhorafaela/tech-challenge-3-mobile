@@ -1,7 +1,7 @@
 import { useThemeColor } from '@/src/hooks/useThemeColor';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { TabItem as TabItemType } from './types';
+import { TabItem as TabItemType } from '../types';
 
 interface TabItemProps {
   item: TabItemType;
@@ -58,3 +58,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+

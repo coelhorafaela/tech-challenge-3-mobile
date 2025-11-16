@@ -1,11 +1,11 @@
 import { useThemeColor } from "@/src/hooks/useThemeColor";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import Animated, {
-  useAnimatedStyle,
-  withSpring,
+    useAnimatedStyle,
+    withSpring,
 } from "react-native-reanimated";
+import { TabItem as TabItemType } from "../types";
 import { TabItem } from "./TabItem";
-import { TabItem as TabItemType } from "./types";
 
 interface TabBarProps {
   tabs: TabItemType[];
@@ -94,3 +94,4 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 });
+

@@ -11,3 +11,4 @@ export interface BottomTabNavigatorProps {
   onTabChange: (tabId: string) => void;
   tabs: Omit<TabItem, 'isActive' | 'onPress'>[];
 }
+

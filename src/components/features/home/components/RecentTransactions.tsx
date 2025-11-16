@@ -1,16 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Text as RNText,
-  ScrollView,
-  View,
+    ActivityIndicator,
+    Text as RNText,
+    ScrollView,
+    View,
 } from "react-native";
 
-import { SegmentControl } from "@/src/components/SegmentControl";
 import {
-  TransactionItem as TransactionItemComponent,
-  TransactionItemProps,
-} from "@/src/components/TransactionItem";
+    TransactionItem as TransactionItemComponent,
+    TransactionItemProps,
+} from "@/src/components/features/home/components/TransactionItem";
+import { SegmentControl } from "@/src/components/ui/SegmentControl";
 import { bankingApi, type Transaction } from "@/src/services/bankingApi";
 
 type TabKey = "income" | "expense";
@@ -223,3 +223,4 @@ export function RecentTransactions() {
     </View>
   );
 }
+

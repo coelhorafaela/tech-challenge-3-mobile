@@ -1,7 +1,7 @@
 import {
   TransactionItem,
   type TransactionItemProps,
-} from "@/src/components/TransactionItem";
+} from "@/src/components/features/home/components/TransactionItem";
 import { ROUTE_AUTH_LOGIN } from "@/src/constants/routes";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useCards } from "@/src/hooks/useCards";

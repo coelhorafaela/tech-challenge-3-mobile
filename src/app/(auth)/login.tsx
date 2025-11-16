@@ -1,4 +1,4 @@
-import Toast from "@/src/components/Toast";
+import Toast from "@/src/components/ui/Toast";
 import { ROUTE_PROTECTED_HOME } from "@/src/constants/routes";
 import { useAuth } from "@/src/hooks/useAuth";
 import { validateLoginForm, validateRegisterForm } from "@/src/utils/validation";

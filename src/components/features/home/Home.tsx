@@ -5,13 +5,13 @@ import { useCallback, useState } from "react";
 import { ActivityIndicator, Text as RNText, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { RecentTransactions } from "@/src/components/Home/RecentTransactions";
+import { RecentTransactions } from "@/src/components/features/home/components/RecentTransactions";
 import { useAccount } from "@/src/hooks/useAccount";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useCards } from "@/src/hooks/useCards";
 import { formatCurrency, formatCurrencyFromNumber } from "@/src/utils/currency";
 
-export function HomeTabContent() {
+export function Home() {
   const [balanceVisible, setBalanceVisible] = useState(true);
   const { logout } = useAuth();
   const { account, loadingAccount } = useAccount();
@@ -241,3 +241,4 @@ export function HomeTabContent() {
     </SafeAreaView>
   );
 }
+

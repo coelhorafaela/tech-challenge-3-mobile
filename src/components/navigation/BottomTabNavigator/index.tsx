@@ -1,10 +1,10 @@
 import { useThemeColor } from "@/src/hooks/useThemeColor";
 import { StyleSheet, Text, View } from "react-native";
 
-import { HomeTabContent } from "@/src/components/Home";
-import { Dashboard } from '../Dashboard';
-import { StatementTabContent } from "./StatementTabContent";
-import { TabBar } from "./TabBar";
+import { Dashboard } from '@/src/components/features/dashboard/Dashboard';
+import { Home } from "@/src/components/features/home/Home";
+import { Statement } from "@/src/components/features/statement/Statement";
+import { TabBar } from "./components/TabBar";
 import type { BottomTabNavigatorProps, TabItem } from "./types";
 
 export function BottomTabNavigator({
@@ -23,10 +23,9 @@ export function BottomTabNavigator({
   const renderContent = () => {
     switch (activeTab) {
       case "home":
-        return <HomeTabContent />;
-
+        return <Home />;
       case "statement":
-        return <StatementTabContent />;
+        return <Statement />;
       case 'dashboard':
         return <Dashboard />;
       default:
@@ -99,3 +98,4 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 });
+

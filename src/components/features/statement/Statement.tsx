@@ -1,32 +1,32 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
 } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    FlatList,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useThemeColor } from "@/src/hooks/useThemeColor";
 import {
-  getAccountStatement,
-  type AccountStatementEntry,
+    getAccountStatement,
+    type AccountStatementEntry,
 } from "@/src/services/firebase";
 import { formatCurrency } from "@/src/utils/currency";
 
 const PAGE_SIZE = 10;
 
-export function StatementTabContent() {
+export function Statement() {
   const textColor = useThemeColor({}, "text");
   const cardBackgroundColor = useThemeColor(
     { light: "#FFFFFF", dark: "#1F2123" },
@@ -401,3 +401,4 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
 });
+
