@@ -6,6 +6,7 @@ import { ActivityIndicator, Text as RNText, TouchableOpacity, View } from "react
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { RecentTransactions } from "@/src/components/features/home/components/RecentTransactions";
+import { ROUTE_PROTECTED_CARD, ROUTE_ROOT } from "@/src/constants/routes";
 import { useAccount } from "@/src/hooks/useAccount";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useCards } from "@/src/hooks/useCards";
@@ -21,7 +22,7 @@ export function Home() {
 
   const handleLogout = useCallback(async () => {
     await logout();
-    router.replace("/");
+    router.replace(ROUTE_ROOT);
   }, [logout]);
 
   const getInitials = (name: string | undefined) => {
@@ -206,7 +207,7 @@ export function Home() {
             >
               <TouchableOpacity
                 style={{ alignItems: "center", gap: 12 }}
-                onPress={() => router.push("/card")}
+                onPress={() => router.push(ROUTE_PROTECTED_CARD)}
                 activeOpacity={0.7}
               >
                 <View

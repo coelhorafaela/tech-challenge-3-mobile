@@ -1,26 +1,28 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
+
+import { ROUTE_PROTECTED_NEW_TRANSACTION } from "@/src/constants/routes";
 import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
 } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    RefreshControl,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useThemeColor } from "@/src/hooks/useThemeColor";
 import {
-    getAccountStatement,
-    type AccountStatementEntry,
+  getAccountStatement,
+  type AccountStatementEntry,
 } from "@/src/services/firebase";
 import { formatCurrency } from "@/src/utils/currency";
 
@@ -206,7 +208,7 @@ export function Statement() {
             Acompanhe suas movimentações em tempo real.
           </Text>
         </View>
-        <Link href="/new-transaction" asChild>
+        <Link href={ROUTE_PROTECTED_NEW_TRANSACTION} asChild>
           <TouchableOpacity style={styles.newTransactionButton}>
             <Ionicons name="add-circle-outline" size={18} color="#FFFFFF" />
             <Text style={styles.newTransactionText}>Nova transação</Text>
