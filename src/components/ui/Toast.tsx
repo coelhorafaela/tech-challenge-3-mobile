@@ -2,6 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 
+import { TOAST_ANIMATION } from '@/src/constants';
+
 interface ToastProps {
   visible: boolean;
   message: string;
@@ -17,19 +19,21 @@ export default function Toast({
   onHide, 
   duration = 3000 
 }: ToastProps) {
-  const translateY = useRef(new Animated.Value(-100)).current;
+  const translateY = useRef(
+    new Animated.Value(TOAST_ANIMATION.INITIAL_TRANSLATE_Y)
+  ).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   const hideToast = useCallback(() => {
     Animated.parallel([
       Animated.timing(translateY, {
-        toValue: -100,
-        duration: 300,
+        toValue: TOAST_ANIMATION.INITIAL_TRANSLATE_Y,
+        duration: TOAST_ANIMATION.DURATION,
         useNativeDriver: true,
       }),
       Animated.timing(opacity, {
         toValue: 0,
-        duration: 300,
+        duration: TOAST_ANIMATION.DURATION,
         useNativeDriver: true,
       }),
     ]).start(() => {
@@ -43,12 +47,12 @@ export default function Toast({
       Animated.parallel([
         Animated.timing(translateY, {
           toValue: 0,
-          duration: 300,
+          duration: TOAST_ANIMATION.DURATION,
           useNativeDriver: true,
         }),
         Animated.timing(opacity, {
           toValue: 1,
-          duration: 300,
+          duration: TOAST_ANIMATION.DURATION,
           useNativeDriver: true,
         }),
       ]).start();

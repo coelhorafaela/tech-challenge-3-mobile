@@ -1,6 +1,6 @@
-type ColorValue = `#${string}`;
+export type ColorValue = `#${string}`;
 
-type ColorTheme = {
+export type ColorTheme = {
   text: ColorValue;
   secondary?: ColorValue;
   background: ColorValue;
@@ -8,12 +8,12 @@ type ColorTheme = {
   icon: ColorValue;
   tabIconDefault: ColorValue;
   tabIconSelected: ColorValue;
-}
+};
 
-type ColorScheme = {
+export type ColorScheme = {
   light: ColorTheme;
   dark: ColorTheme;
-}
+};
 
 const tintColorLight: ColorValue = '#334FBA';
 const tintColorDark: ColorValue = '#fff';
@@ -37,3 +37,4 @@ export const Colors: ColorScheme = {
     tabIconSelected: tintColorDark,
   },
 };
+

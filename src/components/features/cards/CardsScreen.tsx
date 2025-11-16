@@ -1,4 +1,8 @@
-import { ROUTE_AUTH_LOGIN } from '@/src/constants/routes';
+import {
+  CARD_TRANSACTIONS_PANEL,
+  ROUTE_AUTH_LOGIN,
+  TRANSACTION_LIST_LIMIT,
+} from '@/src/constants';
 import { useAuth } from '@/src/hooks/useAuth';
 import { useCards } from '@/src/hooks/useCards';
 import type { PaymentCardType } from '@/src/services/firebase';
@@ -12,12 +16,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { TransactionItemProps } from '@/src/components/features/home/components/TransactionItem';
 import {
-    CardCarousel,
-    CardDetails,
-    CardTransactions,
-    CardsHeader,
-    EmptyCardsState,
-    ErrorCard,
+  CardCarousel,
+  CardDetails,
+  CardTransactions,
+  CardsHeader,
+  EmptyCardsState,
+  ErrorCard,
 } from './components';
 import { mapCardToDisplay, mapCardTypeToLabel } from './utils/cardUtils';
 import { normalizeTransaction } from './utils/transactionUtils';
@@ -119,7 +123,7 @@ export function CardsScreen() {
       try {
         const response = await getPaymentCardTransactions({
           cardId,
-          limit: 20,
+          limit: TRANSACTION_LIST_LIMIT,
         });
 
         if (!response?.success) {
@@ -291,13 +295,20 @@ export function CardsScreen() {
         },
         onPanResponderMove: (_, gestureState) => {
           if (!isCollapsed && gestureState.dy > 0) {
-            translateY.setValue(Math.min(gestureState.dy, 260));
+            translateY.setValue(
+              Math.min(gestureState.dy, CARD_TRANSACTIONS_PANEL.COLLAPSED_TRANSLATE_Y)
+            );
           } else if (isCollapsed && gestureState.dy < 0) {
-            translateY.setValue(Math.max(260 + gestureState.dy, 0));
+            translateY.setValue(
+              Math.max(
+                CARD_TRANSACTIONS_PANEL.COLLAPSED_TRANSLATE_Y + gestureState.dy,
+                0
+              )
+            );
           }
         },
         onPanResponderRelease: (_, gestureState) => {
-          const threshold = 100;
+          const threshold = CARD_TRANSACTIONS_PANEL.PAN_THRESHOLD;
           const shouldCollapse = !isCollapsed
             ? gestureState.dy > threshold
             : gestureState.dy > -threshold;
@@ -305,25 +316,27 @@ export function CardsScreen() {
           if (shouldCollapse && !isCollapsed) {
             setIsCollapsed(true);
             Animated.spring(translateY, {
-              toValue: 260,
+              toValue: CARD_TRANSACTIONS_PANEL.COLLAPSED_TRANSLATE_Y,
               useNativeDriver: false,
-              tension: 100,
-              friction: 8,
+              tension: CARD_TRANSACTIONS_PANEL.SPRING_TENSION,
+              friction: CARD_TRANSACTIONS_PANEL.SPRING_FRICTION,
             }).start();
           } else if (!shouldCollapse && isCollapsed) {
             setIsCollapsed(false);
             Animated.spring(translateY, {
               toValue: 0,
               useNativeDriver: false,
-              tension: 100,
-              friction: 8,
+              tension: CARD_TRANSACTIONS_PANEL.SPRING_TENSION,
+              friction: CARD_TRANSACTIONS_PANEL.SPRING_FRICTION,
             }).start();
           } else {
             Animated.spring(translateY, {
-              toValue: isCollapsed ? 260 : 0,
+              toValue: isCollapsed
+                ? CARD_TRANSACTIONS_PANEL.COLLAPSED_TRANSLATE_Y
+                : 0,
               useNativeDriver: false,
-              tension: 100,
-              friction: 8,
+              tension: CARD_TRANSACTIONS_PANEL.SPRING_TENSION,
+              friction: CARD_TRANSACTIONS_PANEL.SPRING_FRICTION,
             }).start();
           }
         },

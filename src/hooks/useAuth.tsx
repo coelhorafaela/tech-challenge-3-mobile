@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, updateProfile } from 'firebase/auth';
 import React, { ReactNode, createContext, useContext, useEffect, useRef, useState } from 'react';
 
-import { ACCOUNT_DETAILS_STORAGE_KEY } from '../constants/storageKeys';
+import { ACCOUNT_DETAILS_STORAGE_KEY, AUTH_DELAY_MS } from '../constants';
 import { createBankAccount, getAccountDetails, getCurrentUser, isFirebaseAvailable, onAuthStateChange, signIn, signOut, signUp } from '../services/firebase';
 
 interface AuthContextType {
@@ -203,7 +203,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         const waitForAccountDetails = async (
           maxAttempts: number = 6,
-          delayMs: number = 500
+          delayMs: number = AUTH_DELAY_MS
         ) => {
           let lastError: unknown;
 
