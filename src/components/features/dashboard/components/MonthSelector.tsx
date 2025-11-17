@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-import { useThemeColor } from "@/src/hooks/useThemeColor";
+import { useThemeColor } from "@/src/hooks";
 
 export interface MonthOption {
   value: string;

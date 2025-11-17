@@ -7,9 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { RecentTransactions } from "@/src/components/features/home/components/RecentTransactions";
 import { ROUTE_PROTECTED_CARD, ROUTE_ROOT } from "@/src/constants/routes";
-import { useAccount } from "@/src/hooks/useAccount";
-import { useAuth } from "@/src/hooks/useAuth";
-import { useCards } from "@/src/hooks/useCards";
+import { useAccount, useAuth, useCards } from "@/src/hooks";
 import { formatCurrency, formatCurrencyFromNumber } from "@/src/utils/currency";
 
 export function Home() {

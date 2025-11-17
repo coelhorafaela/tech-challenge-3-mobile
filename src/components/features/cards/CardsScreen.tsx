@@ -3,8 +3,7 @@ import {
   ROUTE_AUTH_LOGIN,
   TRANSACTION_LIST_LIMIT,
 } from '@/src/constants';
-import { useAuth } from '@/src/hooks/useAuth';
-import { useCards } from '@/src/hooks/useCards';
+import { useAuth, useCards } from '@/src/hooks';
 import type { PaymentCardType } from '@/src/services/firebase';
 import { getPaymentCardTransactions } from '@/src/services/firebase';
 import { useFocusEffect } from '@react-navigation/native';

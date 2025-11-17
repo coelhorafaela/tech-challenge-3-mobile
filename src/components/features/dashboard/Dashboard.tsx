@@ -1,5 +1,4 @@
-import { useThemeColor } from "@/src/hooks/useThemeColor";
-import { useYearlyTransactions } from "@/src/hooks/useTransactions";
+import { useThemeColor, useYearlyTransactions } from "@/src/hooks";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 

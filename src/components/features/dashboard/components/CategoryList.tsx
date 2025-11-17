@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { useThemeColor } from "@/src/hooks/useThemeColor";
+import { useThemeColor } from "@/src/hooks";
 
 interface CategoryItem {
   category: string;

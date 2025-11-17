@@ -1,4 +1,4 @@
-import { useThemeColor } from "@/src/hooks/useThemeColor";
+import { useThemeColor } from "@/src/hooks";
 import { StyleSheet, Text, View } from "react-native";
 
 import { Dashboard } from '@/src/components/features/dashboard/Dashboard';

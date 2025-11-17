@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withDelay,
-    withTiming,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
 } from "react-native-reanimated";
 
-import { useThemeColor } from "@/src/hooks/useThemeColor";
+import { useThemeColor } from "@/src/hooks";
 
 interface ChartData {
   deposits: number;

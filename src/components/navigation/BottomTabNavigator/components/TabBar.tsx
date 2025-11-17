@@ -1,8 +1,8 @@
-import { useThemeColor } from "@/src/hooks/useThemeColor";
+import { useThemeColor } from "@/src/hooks";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import Animated, {
-    useAnimatedStyle,
-    withSpring,
+  useAnimatedStyle,
+  withSpring,
 } from "react-native-reanimated";
 import { TabItem as TabItemType } from "../types";
 import { TabItem } from "./TabItem";

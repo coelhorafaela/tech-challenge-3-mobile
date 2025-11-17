@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useAccount } from '@/src/hooks/useAccount';
+import { useAccount } from '@/src/hooks';
 import { bankingApi, type TransactionType } from '@/src/services/bankingApi';
 import { formatCurrency } from '@/src/utils/currency';
 

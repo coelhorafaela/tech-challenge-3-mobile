@@ -1,6 +1,4 @@
-import { AccountProvider } from "@/src/hooks/useAccount";
-import { AuthProvider } from "@/src/hooks/useAuth";
-import { CardProvider } from "@/src/hooks/useCards";
+import { AccountProvider, AuthProvider, CardProvider } from "@/src/hooks";
 import { Stack } from "expo-router";
 
 import "@/src/services/firebase";
