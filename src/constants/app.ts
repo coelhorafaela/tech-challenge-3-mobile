@@ -1,0 +1,25 @@
+export const TRANSACTION_LIST_LIMIT = 20;
+
+export const ANIMATION_DURATION = {
+  SHORT: 300,
+  MEDIUM: 500,
+  LONG: 800,
+  VERY_LONG: 1000,
+} as const;
+
+export const TOAST_ANIMATION = {
+  INITIAL_TRANSLATE_Y: -100,
+  DURATION: ANIMATION_DURATION.SHORT,
+} as const;
+
+export const CARD_TRANSACTIONS_PANEL = {
+  COLLAPSED_TRANSLATE_Y: 260,
+  PAN_THRESHOLD: 100,
+  SPRING_TENSION: 100,
+  SPRING_FRICTION: 8,
+} as const;
+
+export const AUTH_DELAY_MS = 500;
+
+export const CURRENCY_DIVISOR = 100;
+
