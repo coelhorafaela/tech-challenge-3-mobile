@@ -1,5 +1,5 @@
 import type { PaymentCard, PaymentCardType } from '@/src/infrastructure/services';
-import { formatCurrencyFromNumber } from '@/src/utils/currency';
+import { formatCurrencyFromNumber } from '@/src/presentation/utils/currency';
 
 export type DisplayCard = {
   id: string;

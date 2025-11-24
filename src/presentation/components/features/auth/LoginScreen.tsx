@@ -1,7 +1,7 @@
 import { ROUTE_PROTECTED_HOME } from "@/src/constants/routes";
 import { useAuth } from "@/src/hooks";
 import { LoadingScreen, Toast } from "@/src/presentation";
-import { validateLoginForm, validateRegisterForm } from "@/src/utils/validation";
+import { validateLoginForm, validateRegisterForm } from "@/src/presentation/utils/validation";
 import { Ionicons } from "@expo/vector-icons";
 import { Redirect } from "expo-router";
 import { StatusBar } from "expo-status-bar";

@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Text as RNText, View } from "react-native";
 
-import { formatCurrency } from "@/src/utils/currency";
+import { formatCurrency } from "@/src/presentation/utils/currency";
 
 export interface TransactionItemProps {
   id: string | number;

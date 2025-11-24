@@ -10,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTransactions } from '@/src/application/providers/transaction.provider';
 import type { TransactionType } from '@/src/domain/entities/transaction.entity';
 import { useAccount } from '@/src/hooks';
-import { formatCurrency } from '@/src/utils/currency';
+import { formatCurrency } from '@/src/presentation/utils/currency';
 
 import { NewTransactionForm } from './NewTransactionForm';
 import { transactionTypeOptions } from './components';

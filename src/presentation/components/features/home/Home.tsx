@@ -8,7 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ROUTE_PROTECTED_CARD, ROUTE_ROOT } from "@/src/constants/routes";
 import { useAccount, useAuth, useCards } from "@/src/hooks";
 import { RecentTransactions } from "@/src/presentation";
-import { formatCurrency, formatCurrencyFromNumber } from "@/src/utils/currency";
+import { formatCurrency, formatCurrencyFromNumber } from "@/src/presentation/utils/currency";
 
 export function Home() {
   const [balanceVisible, setBalanceVisible] = useState(true);

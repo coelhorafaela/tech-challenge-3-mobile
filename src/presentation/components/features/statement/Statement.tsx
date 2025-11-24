@@ -24,7 +24,7 @@ import {
   getAccountStatement,
   type AccountStatementEntry,
 } from "@/src/infrastructure/services";
-import { formatCurrency } from "@/src/utils/currency";
+import { formatCurrency } from "@/src/presentation/utils/currency";
 
 const PAGE_SIZE = 10;
 
