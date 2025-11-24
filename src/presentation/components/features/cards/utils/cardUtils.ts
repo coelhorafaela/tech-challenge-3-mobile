@@ -1,4 +1,4 @@
-import type { PaymentCard, PaymentCardType } from '@/src/services';
+import type { PaymentCard, PaymentCardType } from '@/src/infrastructure/services';
 import { formatCurrencyFromNumber } from '@/src/utils/currency';
 
 export type DisplayCard = {

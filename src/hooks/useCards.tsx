@@ -15,7 +15,7 @@ import {
   createPaymentCard,
   deletePaymentCard,
   listPaymentCards,
-} from '../services';
+} from '../infrastructure/services';
 import { useAuth } from './useAuth';
 
 interface CardContextValue {

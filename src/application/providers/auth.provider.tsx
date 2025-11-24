@@ -8,7 +8,7 @@ import { SignInUseCase } from '../../domain/use-cases/auth/sign-in.use-case';
 import { SignOutUseCase } from '../../domain/use-cases/auth/sign-out.use-case';
 import { SignUpUseCase } from '../../domain/use-cases/auth/sign-up.use-case';
 import { AuthRepository } from '../../infrastructure/repositories/auth.repository';
-import { createBankAccount, getAccountDetails } from '../../services';
+import { createBankAccount, getAccountDetails } from '../../infrastructure/services';
 
 interface AuthContextType {
   user: User | null;
@@ -162,7 +162,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (normalizedName) {
         try {
           const firebaseAuth = await import('firebase/auth');
-          const { getFirebaseAuth } = await import('../../services/config/firebase');
+          const { getFirebaseAuth } = await import('../../infrastructure/services/config/firebase');
           const auth = getFirebaseAuth();
           const currentUser = auth.currentUser;
           if (currentUser) {

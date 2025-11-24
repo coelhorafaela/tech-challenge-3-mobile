@@ -23,7 +23,7 @@ import { useThemeColor } from "@/src/hooks";
 import {
   getAccountStatement,
   type AccountStatementEntry,
-} from "@/src/services";
+} from "@/src/infrastructure/services";
 import { formatCurrency } from "@/src/utils/currency";
 
 const PAGE_SIZE = 10;

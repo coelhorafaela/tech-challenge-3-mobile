@@ -1,4 +1,4 @@
-import { getAccountStatementSimple, type Transaction } from '@/src/services';
+import { getAccountStatementSimple, type Transaction } from '@/src/infrastructure/services';
 import { useEffect, useState } from 'react';
 
 type MonthlyData = {

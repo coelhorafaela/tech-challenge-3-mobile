@@ -2,7 +2,7 @@ import { httpsCallable } from 'firebase/functions';
 import { CardMapper } from '../../application/mappers/card.mapper';
 import type { Card, CardType } from '../../domain/entities/card.entity';
 import type { CardRepository as ICardRepository } from '../../domain/repositories/card.repository';
-import { getFirebaseFunctions } from '../../services/config/firebase';
+import { getFirebaseFunctions } from '../services/config/firebase';
 
 const normalizeCallableData = <TData>(data: unknown): TData => {
   if (!data) {

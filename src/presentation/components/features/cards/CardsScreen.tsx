@@ -5,8 +5,8 @@ import {
 } from '@/src/constants';
 import type { CardType } from '@/src/domain/entities/card.entity';
 import { useAccount, useAuth, useCards } from '@/src/hooks';
-import type { PaymentCardType } from '@/src/services';
-import { getPaymentCardTransactions } from '@/src/services';
+import type { PaymentCardType } from '@/src/infrastructure/services';
+import { getPaymentCardTransactions } from '@/src/infrastructure/services';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';

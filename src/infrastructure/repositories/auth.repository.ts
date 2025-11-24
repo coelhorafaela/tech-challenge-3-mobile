@@ -1,13 +1,13 @@
 import {
-    createUserWithEmailAndPassword,
-    signOut as firebaseSignOut, updateProfile as firebaseUpdateProfile, onAuthStateChanged,
-    signInWithEmailAndPassword,
-    type User as FirebaseUser
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut, updateProfile as firebaseUpdateProfile, onAuthStateChanged,
+  signInWithEmailAndPassword,
+  type User as FirebaseUser
 } from 'firebase/auth';
 import { AuthMapper } from '../../application/mappers/auth.mapper';
 import type { User } from '../../domain/entities/user.entity';
 import type { AuthRepository as IAuthRepository } from '../../domain/repositories/auth.repository';
-import { getFirebaseAuth } from '../../services/config/firebase';
+import { getFirebaseAuth } from '../services/config/firebase';
 
 export class AuthRepository implements IAuthRepository {
   async signIn(email: string, password: string): Promise<User> {

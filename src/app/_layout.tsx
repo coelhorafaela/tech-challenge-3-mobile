@@ -4,7 +4,7 @@ import { CardProvider } from "@/src/application/providers/card.provider";
 import { TransactionProvider } from "@/src/application/providers/transaction.provider";
 import { Stack } from "expo-router";
 
-import "@/src/services/config/firebase";
+import "@/src/infrastructure/services/config/firebase";
 
 export default function RootLayout() {
   return (

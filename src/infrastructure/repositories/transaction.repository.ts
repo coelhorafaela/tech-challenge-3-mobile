@@ -2,7 +2,7 @@ import { httpsCallable } from 'firebase/functions';
 import { TransactionMapper } from '../../application/mappers/transaction.mapper';
 import type { Transaction, TransactionType } from '../../domain/entities/transaction.entity';
 import type { TransactionRepository as ITransactionRepository } from '../../domain/repositories/transaction.repository';
-import { getFirebaseFunctions } from '../../services/config/firebase';
+import { getFirebaseFunctions } from '../services/config/firebase';
 
 const normalizeCallableData = <TData>(data: unknown): TData => {
   if (!data) {

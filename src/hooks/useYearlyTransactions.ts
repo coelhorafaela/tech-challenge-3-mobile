@@ -1,4 +1,4 @@
-import { getYearlyTransactions, type Transaction, type YearlyTransactionsResponse } from '@/src/services';
+import { getYearlyTransactions, type Transaction, type YearlyTransactionsResponse } from '@/src/infrastructure/services';
 import { useEffect, useState } from 'react';
 
 type MonthlyData = {

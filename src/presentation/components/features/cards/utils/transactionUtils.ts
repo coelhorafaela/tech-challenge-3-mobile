@@ -1,5 +1,5 @@
+import type { PaymentCardTransaction } from '@/src/infrastructure/services';
 import type { TransactionItemProps } from '@/src/presentation';
-import type { PaymentCardTransaction } from '@/src/services';
 import { Ionicons } from '@expo/vector-icons';
 
 export const TRANSACTION_ICONS: Record<

@@ -2,7 +2,7 @@ import { httpsCallable } from 'firebase/functions';
 import { AccountMapper } from '../../application/mappers/account.mapper';
 import type { Account } from '../../domain/entities/account.entity';
 import type { AccountRepository as IAccountRepository } from '../../domain/repositories/account.repository';
-import { getFirebaseFunctions } from '../../services/config/firebase';
+import { getFirebaseFunctions } from '../services/config/firebase';
 
 const normalizeCallableData = <TData>(data: unknown): TData => {
   if (!data) {
