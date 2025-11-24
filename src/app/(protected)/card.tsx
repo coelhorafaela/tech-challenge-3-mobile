@@ -1,4 +1,4 @@
-import { CardsScreen } from '@/src/components/features/cards';
+import { CardsScreen } from '@/src/presentation';
 
 export default function CardPage() {
   return <CardsScreen />;

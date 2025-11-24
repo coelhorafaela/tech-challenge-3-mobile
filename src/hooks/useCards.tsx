@@ -15,7 +15,7 @@ import {
   createPaymentCard,
   deletePaymentCard,
   listPaymentCards,
-} from '../services/firebase';
+} from '../services';
 import { useAuth } from './useAuth';
 
 interface CardContextValue {

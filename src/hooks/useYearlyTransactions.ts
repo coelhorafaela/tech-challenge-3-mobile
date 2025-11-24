@@ -1,4 +1,4 @@
-import { bankingApi, type Transaction, type YearlyTransactionsResponse } from '@/src/services/bankingApi';
+import { getYearlyTransactions, type Transaction, type YearlyTransactionsResponse } from '@/src/services';
 import { useEffect, useState } from 'react';
 
 type MonthlyData = {
@@ -18,7 +18,7 @@ export function useYearlyTransactions(year?: number) {
     setError(null);
 
     try {
-      const response = await bankingApi.getYearlyTransactions(year);
+      const response = await getYearlyTransactions(year);
       if (response.success) {
         setYearlyData(response);
       }

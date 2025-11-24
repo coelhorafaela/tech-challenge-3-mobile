@@ -1,4 +1,4 @@
-import { NewTransactionScreen } from '@/src/components/features/transactions';
+import { NewTransactionScreen } from '@/src/presentation';
 
 export default function NewTransactionPage() {
   return <NewTransactionScreen />;

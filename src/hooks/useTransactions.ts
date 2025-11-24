@@ -1,4 +1,4 @@
-import { bankingApi, type Transaction } from '@/src/services/bankingApi';
+import { getAccountStatementSimple, type Transaction } from '@/src/services';
 import { useEffect, useState } from 'react';
 
 type MonthlyData = {
@@ -16,7 +16,7 @@ export function useTransactions(accountNumber?: string) {
     setError(null);
 
     try {
-      const response = await bankingApi.getAccountStatement();
+      const response = await getAccountStatementSimple();
       if (response.success) {
         setTransactions(response.transactions);
       }

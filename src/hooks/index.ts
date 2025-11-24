@@ -1,9 +1,10 @@
-export { AccountProvider, useAccount } from './useAccount';
-export { AuthProvider, useAuth } from './useAuth';
-export { CardProvider, useCards } from './useCards';
+export { AccountProvider, useAccount } from '../application/providers/account.provider';
+export { AuthProvider, useAuth } from '../application/providers/auth.provider';
+export { CardProvider, useCards } from '../application/providers/card.provider';
 
 export { useColorScheme } from './useColorScheme';
 export { useThemeColor } from './useThemeColor';
+
 export { useTransactions } from './useTransactions';
 export { useYearlyTransactions } from './useYearlyTransactions';
 

@@ -11,7 +11,7 @@ import {
 } from 'react';
 
 import { ACCOUNT_DETAILS_STORAGE_KEY } from '../constants/storageKeys';
-import { type GetAccountDetailsResponse, getAccountDetails } from '../services/firebase';
+import { type GetAccountDetailsResponse, getAccountDetails } from '../services';
 import { useAuth } from './useAuth';
 
 type BankAccountDetails = Omit<GetAccountDetailsResponse, 'success'>;
