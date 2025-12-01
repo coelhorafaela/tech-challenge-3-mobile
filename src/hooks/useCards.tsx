@@ -1,5 +1,5 @@
-import React, {
-  ReactNode,
+import {
+  type ReactNode,
   createContext,
   useCallback,
   useContext,
@@ -55,7 +55,7 @@ const getErrorCode = (error: unknown): string | undefined => {
   return undefined;
 };
 
-export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const CardProvider = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated } = useAuth();
   const [cards, setCards] = useState<PaymentCard[]>([]);
   const [loadingCards, setLoadingCards] = useState(false);
@@ -163,7 +163,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const response = await createPaymentCard(payload);
 
         if (!response?.success || !response.card) {
-          throw new Error(response?.message ?? 'Não foi possível criar o cartão.');
+          throw new Error('Não foi possível criar o cartão.');
         }
 
         if (isMountedRef.current) {
