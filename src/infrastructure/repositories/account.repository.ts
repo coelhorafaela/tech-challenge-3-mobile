@@ -1,21 +1,9 @@
-import { httpsCallable } from 'firebase/functions';
-import { AccountMapper } from '../../application/mappers/account.mapper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { CURRENT_USER_KEY } from '../../constants';
 import type { Account } from '../../domain/entities/account.entity';
 import type { AccountRepository as IAccountRepository } from '../../domain/repositories/account.repository';
-import { getFirebaseFunctions } from '../services/config/firebase';
-
-const normalizeCallableData = <TData>(data: unknown): TData => {
-  if (!data) {
-    throw new Error('Resposta vazia recebida do Firebase Functions.');
-  }
-
-  const typedData = data as { result?: TData };
-  if (typedData && typedData.result) {
-    return typedData.result;
-  }
-
-  return data as TData;
-};
+import { SQLiteDatabase } from '../services/config/sqlite';
 
 export class AccountRepository implements IAccountRepository {
   async createAccount(params: {
@@ -23,81 +11,64 @@ export class AccountRepository implements IAccountRepository {
     ownerEmail: string;
     ownerName: string;
   }): Promise<Account> {
-    const functions = getFirebaseFunctions();
-    const callable = httpsCallable<
-      { uid: string; ownerEmail?: string | null; ownerName?: string | null },
-      {
-        success?: boolean;
-        message?: string;
-        accountNumber?: string;
-        agency?: string;
-        ownerName?: string;
-        balance?: number;
-      }
-    >(functions, 'createBankAccount');
+    const db = await SQLiteDatabase.getInstance();
 
-    const response = await callable({
-      uid: params.uid,
-      ownerEmail: params.ownerEmail,
-      ownerName: params.ownerName,
-    });
+    const existingAccount = await db.getFirstAsync<{ id: string }>(
+      'SELECT id FROM accounts WHERE user_id = ?',
+      [params.uid]
+    );
 
-    const data = normalizeCallableData<{
-      success?: boolean;
-      message?: string;
-      accountNumber?: string;
-      agency?: string;
-      ownerName?: string;
-      balance?: number;
-    }>(response.data);
-
-    if (data.success === false) {
-      throw new Error(data.message ?? 'Não foi possível criar a conta bancária.');
+    if (existingAccount) {
+      throw new Error('Usuário já possui uma conta bancária');
     }
 
-    return AccountMapper.fromFirebaseResponse({
-      accountNumber: data.accountNumber || '',
-      agency: data.agency || '0001',
-      ownerName: data.ownerName || params.ownerName,
+    const accountNumber = `${Math.floor(10000000 + Math.random() * 90000000)}`;
+    const accountId = `account_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const createdAt = Date.now();
+
+    await db.runAsync(
+      'INSERT INTO accounts (id, user_id, account_number, agency, owner_name, owner_email, balance, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [accountId, params.uid, accountNumber, '0001', params.ownerName, params.ownerEmail, 0, createdAt]
+    );
+
+    return {
+      accountNumber,
+      agency: '0001',
+      ownerName: params.ownerName,
       ownerEmail: params.ownerEmail,
-      balance: data.balance || 0,
-    });
+      balance: 0,
+    };
   }
 
   async getAccountDetails(): Promise<Account | null> {
-    const functions = getFirebaseFunctions();
-    const callable = httpsCallable<
-      { accountNumber?: string },
-      {
-        success: boolean;
-        accountNumber: string;
-        agency: string;
-        ownerName: string;
-        balance: number;
-      }
-    >(functions, 'getAccountDetails');
-
     try {
-      const response = await callable({});
-      const data = normalizeCallableData<{
-        success: boolean;
-        accountNumber: string;
+      const userJson = await AsyncStorage.getItem(CURRENT_USER_KEY);
+      if (!userJson) {
+        return null;
+      }
+      
+      const currentUser = JSON.parse(userJson);
+      const db = await SQLiteDatabase.getInstance();
+      
+      const account = await db.getFirstAsync<{
+        account_number: string;
         agency: string;
-        ownerName: string;
+        owner_name: string;
+        owner_email: string;
         balance: number;
-      }>(response.data);
+      }>('SELECT account_number, agency, owner_name, owner_email, balance FROM accounts WHERE user_id = ?', [currentUser.uid]);
 
-      if (!data.success) {
+      if (!account) {
         return null;
       }
 
-      return AccountMapper.fromFirebaseResponse({
-        accountNumber: data.accountNumber,
-        agency: data.agency,
-        ownerName: data.ownerName,
-        ownerEmail: '', // Não vem na resposta, será preenchido pelo provider se necessário
-        balance: data.balance,
-      });
+      return {
+        accountNumber: account.account_number,
+        agency: account.agency,
+        ownerName: account.owner_name,
+        ownerEmail: account.owner_email,
+        balance: account.balance,
+      };
     } catch (error) {
       console.error('Erro ao buscar detalhes da conta:', error);
       return null;
@@ -105,7 +76,11 @@ export class AccountRepository implements IAccountRepository {
   }
 
   async updateAccountBalance(accountNumber: string, newBalance: number): Promise<void> {
-    throw new Error('Atualização de saldo não implementada diretamente');
+    const db = await SQLiteDatabase.getInstance();
+    
+    await db.runAsync(
+      'UPDATE accounts SET balance = ? WHERE account_number = ?',
+      [newBalance, accountNumber]
+    );
   }
 }
-
