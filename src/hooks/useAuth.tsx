@@ -1,9 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User, updateProfile } from 'firebase/auth';
 import React, { ReactNode, createContext, useContext, useEffect, useRef, useState } from 'react';
 
 import { ACCOUNT_DETAILS_STORAGE_KEY, AUTH_DELAY_MS } from '../constants';
-import { createBankAccount, getAccountDetails, getCurrentUser, isFirebaseAvailable, onAuthStateChange, signIn, signOut, signUp } from '../infrastructure/services';
+import type { User } from '../domain/entities/user.entity';
+import { AccountRepository } from '../infrastructure/repositories/account.repository';
+import { AuthRepository } from '../infrastructure/repositories/auth.repository';
+
+const authRepository = new AuthRepository();
+const accountRepository = new AccountRepository();
 
 interface AuthContextType {
   user: User | null;
@@ -31,7 +35,6 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const firebaseConfiguredRef = useRef(isFirebaseAvailable());
   const shouldPersistUserTokenRef = useRef(true);
   const blockAuthStateUpdatesRef = useRef(false);
 
@@ -50,36 +53,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
 
-    const setupAuthListener = () => {
-      firebaseConfiguredRef.current = isFirebaseAvailable();
-
-      if (!firebaseConfiguredRef.current) {
-        console.error('Firebase Auth não está configurado. Verifique as variáveis de ambiente.');
-        setLoading(false);
-        return;
-      }
-
-      const currentUser = getCurrentUser();
-      if (currentUser && !blockAuthStateUpdatesRef.current) {
-        setUser(currentUser);
-        void persistUserToken(currentUser);
-        setLoading(false);
-      }
-
-      unsubscribe = onAuthStateChange(async (firebaseUser) => {
-        if (firebaseUser && blockAuthStateUpdatesRef.current) {
-          return;
+    const setupAuthListener = async () => {
+      try {
+        const currentUser = await authRepository.getCurrentUser();
+        if (currentUser && !blockAuthStateUpdatesRef.current) {
+          setUser(currentUser);
+          await persistUserToken(currentUser);
         }
 
-        setUser(firebaseUser);
+        unsubscribe = authRepository.onAuthStateChange(async (user) => {
+          if (user && blockAuthStateUpdatesRef.current) {
+            return;
+          }
 
-        await persistUserToken(firebaseUser);
+          setUser(user);
+          await persistUserToken(user);
+          setLoading(false);
+        });
 
         setLoading(false);
-      });
+      } catch (error) {
+        console.error('Erro ao configurar listener de autenticação:', error);
+        setLoading(false);
+      }
     };
 
-    setupAuthListener();
+    void setupAuthListener();
 
     return () => {
       if (unsubscribe) {
@@ -99,48 +98,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     shouldPersistUserTokenRef.current = shouldPersistSession;
 
     try {
-      if (!firebaseConfiguredRef.current) {
-        firebaseConfiguredRef.current = isFirebaseAvailable();
-      }
-
-      if (!firebaseConfiguredRef.current) {
-        throw new Error('Firebase Auth não está configurado. Verifique as variáveis de ambiente.');
-      }
-
-      const userCredential = await signIn(email, password);
-      setUser(userCredential.user);
-      await persistUserToken(userCredential.user);
+      const loggedInUser = await authRepository.signIn(email, password);
+      setUser(loggedInUser);
+      await persistUserToken(loggedInUser);
       
       return { success: true };
     } catch (error: any) {
       shouldPersistUserTokenRef.current = previousPersistence;
       console.error('Erro no login:', error);
       
-      // Tratar erros específicos do Firebase
-      let errorMessage = 'Erro ao fazer login';
-      
-      if (error.code) {
-        switch (error.code) {
-          case 'auth/invalid-credential':
-          case 'auth/wrong-password':
-          case 'auth/user-not-found':
-            errorMessage = 'Email ou senha incorretos. Verifique suas credenciais e tente novamente.';
-            break;
-          case 'auth/invalid-email':
-            errorMessage = 'Email inválido. Verifique o formato do email.';
-            break;
-          case 'auth/user-disabled':
-            errorMessage = 'Esta conta foi desabilitada. Entre em contato com o suporte.';
-            break;
-          case 'auth/too-many-requests':
-            errorMessage = 'Muitas tentativas de login. Tente novamente mais tarde.';
-            break;
-          default:
-            errorMessage = error.message || 'Erro ao fazer login';
-        }
-      } else {
-        errorMessage = error.message || 'Erro ao fazer login';
-      }
+      let errorMessage = error.message || 'Erro ao fazer login';
       
       return { 
         success: false, 
@@ -160,44 +127,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       blockAuthStateUpdatesRef.current = true;
       
-      if (!firebaseConfiguredRef.current) {
-        firebaseConfiguredRef.current = isFirebaseAvailable();
-      }
-
-      if (!firebaseConfiguredRef.current) {
-        throw new Error('Firebase Auth não está configurado. Verifique as variáveis de ambiente.');
-      }
-      const userCredential = await signUp(email, password);
+      const userCredential = await authRepository.signUp(email, password);
       const normalizedName = name.trim();
 
       if (normalizedName) {
         try {
-          await updateProfile(userCredential.user, {
-            displayName: normalizedName,
-          });
+          await authRepository.updateUserProfile(userCredential.uid, normalizedName);
         } catch (profileError) {
           console.warn('Não foi possível atualizar o nome do usuário:', profileError);
         }
       }
 
       try {
-        const callableResult = await createBankAccount({
-          uid: userCredential.user.uid,
-          ownerEmail: userCredential.user.email,
-          ownerName: normalizedName || userCredential.user.email,
+        const account = await accountRepository.createAccount({
+          uid: userCredential.uid,
+          ownerEmail: userCredential.email,
+          ownerName: normalizedName || userCredential.email,
         });
-
-        const callableData = callableResult.data as {
-          success?: boolean;
-          message?: string;
-          accountNumber?: string;
-          agency?: string;
-          ownerName?: string;
-          balance?: number;
-        } | undefined;
-        if (callableData && callableData.success === false) {
-          throw new Error(callableData.message ?? 'Não foi possível criar a conta bancária.');
-        }
 
         const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -209,8 +155,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
           for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
-              const details = await getAccountDetails();
-              if (details?.success && details.accountNumber) {
+              const details = await accountRepository.getAccountDetails();
+              if (details && details.accountNumber) {
                 return details;
               }
             } catch (detailError) {
@@ -233,14 +179,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         const fallbackOwnerName =
           accountDetails.ownerName ??
-          callableData?.ownerName ??
-          (normalizedName || userCredential.user.email || '');
+          account.ownerName ??
+          (normalizedName || userCredential.email || '');
 
         const initialAccountDetails = {
           accountNumber: accountDetails.accountNumber,
-          agency: accountDetails.agency ?? callableData?.agency ?? '0001',
+          agency: accountDetails.agency ?? account.agency ?? '0001',
           ownerName: fallbackOwnerName,
-          balance: accountDetails.balance ?? callableData?.balance ?? 0,
+          balance: accountDetails.balance ?? account.balance ?? 0,
         };
 
         await AsyncStorage.setItem(
@@ -253,12 +199,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await AsyncStorage.removeItem('userToken');
         await AsyncStorage.removeItem(ACCOUNT_DETAILS_STORAGE_KEY).catch(() => undefined);
 
-        if (firebaseConfiguredRef.current) {
-          try {
-            await signOut();
-          } catch (signOutError) {
-            console.error('Erro ao desfazer cadastro após falha na criação da conta bancária:', signOutError);
-          }
+        try {
+          await authRepository.signOut();
+        } catch (signOutError) {
+          console.error('Erro ao desfazer cadastro após falha na criação da conta bancária:', signOutError);
         }
 
         const formattedError = new Error(
@@ -268,29 +212,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw formattedError;
       }
 
-      setUser(userCredential.user);
-      await AsyncStorage.setItem('userToken', userCredential.user.uid);
+      setUser(userCredential);
+      await AsyncStorage.setItem('userToken', userCredential.uid);
       
       return { success: true };
     } catch (error: any) {
       console.error('Erro no cadastro:', error);
       let errorMessage = error.message || 'Erro ao criar conta';
-
-      if (error.code) {
-        switch (error.code) {
-          case 'auth/email-already-in-use':
-            errorMessage = 'Este email já está cadastrado. Tente fazer login ou use outro email.';
-            break;
-          case 'auth/invalid-email':
-            errorMessage = 'Email inválido. Verifique o formato do email.';
-            break;
-          case 'auth/weak-password':
-            errorMessage = 'A senha deve ter pelo menos 6 caracteres.';
-            break;
-          default:
-            errorMessage = error.message || 'Erro ao criar conta';
-        }
-      }
 
       return { 
         success: false, 
@@ -304,14 +232,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async (): Promise<void> => {
     try {
-      if (!firebaseConfiguredRef.current) {
-        firebaseConfiguredRef.current = isFirebaseAvailable();
-      }
-
-      if (firebaseConfiguredRef.current) {
-        await signOut();
-      }
-      
+      await authRepository.signOut();
       setUser(null);
       await AsyncStorage.removeItem('userToken');
       await AsyncStorage.removeItem(ACCOUNT_DETAILS_STORAGE_KEY).catch(() => undefined);

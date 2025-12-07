@@ -1,20 +1,30 @@
-import { httpsCallable } from 'firebase/functions';
-import { CardMapper } from '../../application/mappers/card.mapper';
 import type { Card, CardType } from '../../domain/entities/card.entity';
 import type { CardRepository as ICardRepository } from '../../domain/repositories/card.repository';
-import { getFirebaseFunctions } from '../services/config/firebase';
+import { SQLiteDatabase } from '../services/config/sqlite';
 
-const normalizeCallableData = <TData>(data: unknown): TData => {
-  if (!data) {
-    throw new Error('Resposta vazia recebida do Firebase Functions.');
-  }
+const generateCardNumber = (type: CardType): string => {
+  const prefixes: Record<CardType, string> = {
+    CREDIT: '5555',
+    DEBIT: '4444',
+  };
+  const prefix = prefixes[type] || '4444';
+  const rest = Array.from({ length: 12 }, () => Math.floor(Math.random() * 10)).join('');
+  return `${prefix}${rest}`;
+};
 
-  const typedData = data as { result?: TData };
-  if (typedData && typedData.result) {
-    return typedData.result;
-  }
+const generateCVV = (): string => {
+  return Array.from({ length: 3 }, () => Math.floor(Math.random() * 10)).join('');
+};
 
-  return data as TData;
+const generateExpiryDate = (): string => {
+  const now = new Date();
+  const futureYear = now.getFullYear() + 3;
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  return `${month}/${futureYear.toString().slice(-2)}`;
+};
+
+const getCardBrand = (type: CardType): string => {
+  return type === 'CREDIT' ? 'Mastercard' : 'Visa';
 };
 
 export class CardRepository implements ICardRepository {
@@ -23,89 +33,107 @@ export class CardRepository implements ICardRepository {
     cardholderName: string;
     accountNumber: string;
   }): Promise<Card> {
-    const functions = getFirebaseFunctions();
-    const callable = httpsCallable<
-      { type: string; label?: string; brand?: string },
-      { success: boolean; card: any; message?: string }
-    >(functions, 'createPaymentCard');
+    const db = await SQLiteDatabase.getInstance();
+    
+    const cardId = `card_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const cardNumber = generateCardNumber(params.cardType);
+    const cvv = generateCVV();
+    const expiryDate = generateExpiryDate();
+    const brand = getCardBrand(params.cardType);
+    const createdAt = Date.now();
 
-    const response = await callable({
-      type: params.cardType,
-    });
+    await db.runAsync(
+      'INSERT INTO cards (id, account_number, card_number, card_type, cardholder_name, cvv, expiry_date, brand, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [cardId, params.accountNumber, cardNumber, params.cardType, params.cardholderName, cvv, expiryDate, brand, 1, createdAt]
+    );
 
-    const data = normalizeCallableData<{
-      success: boolean;
-      card: any;
-      message?: string;
-    }>(response.data);
-
-    if (!data.success || !data.card) {
-      throw new Error(data.message ?? 'Não foi possível criar o cartão.');
-    }
-
-    return CardMapper.fromFirebaseResponse({
-      ...data.card,
+    return {
+      id: cardId,
+      accountNumber: params.accountNumber,
+      cardNumber,
       cardType: params.cardType,
       cardholderName: params.cardholderName,
-      accountNumber: params.accountNumber,
-    });
+      cvv,
+      expiryDate,
+    };
   }
 
   async listCards(accountNumber?: string): Promise<Card[]> {
-    const functions = getFirebaseFunctions();
-    const callable = httpsCallable<
-      Record<string, never>,
-      { success: boolean; cards: any[] }
-    >(functions, 'listPaymentCards');
-
-    const response = await callable({} as Record<string, never>);
-    const data = normalizeCallableData<{ success: boolean; cards: any[] }>(response.data);
-
-    if (!data.success) {
-      throw new Error('Não foi possível carregar os cartões.');
+    const db = await SQLiteDatabase.getInstance();
+    
+    let query = 'SELECT * FROM cards WHERE is_active = 1';
+    const params: string[] = [];
+    
+    if (accountNumber) {
+      query += ' AND account_number = ?';
+      params.push(accountNumber);
     }
+    
+    query += ' ORDER BY created_at DESC';
 
-    return (data.cards || []).map((card) => CardMapper.fromFirebaseResponse({
-      ...card,
-      accountNumber: accountNumber || card.accountNumber || '',
+    const cards = await db.getAllAsync<{
+      id: string;
+      account_number: string;
+      card_number: string;
+      card_type: string;
+      cardholder_name: string;
+      cvv: string;
+      expiry_date: string;
+      brand: string;
+      is_active: number;
+    }>(query, params);
+
+    return cards.map(card => ({
+      id: card.id,
+      accountNumber: card.account_number,
+      cardNumber: card.card_number,
+      cardType: card.card_type as CardType,
+      cardholderName: card.cardholder_name,
+      cvv: card.cvv,
+      expiryDate: card.expiry_date,
     }));
   }
 
   async getCardById(cardId: string): Promise<Card | null> {
-    const cards = await this.listCards();
-    return cards.find((card) => card.id === cardId) || null;
+    const db = await SQLiteDatabase.getInstance();
+    
+    const card = await db.getFirstAsync<{
+      id: string;
+      account_number: string;
+      card_number: string;
+      card_type: string;
+      cardholder_name: string;
+      cvv: string;
+      expiry_date: string;
+      brand: string;
+      is_active: number;
+    }>('SELECT * FROM cards WHERE id = ?', [cardId]);
+
+    if (!card) {
+      return null;
+    }
+
+    return {
+      id: card.id,
+      accountNumber: card.account_number,
+      cardNumber: card.card_number,
+      cardType: card.card_type as CardType,
+      cardholderName: card.cardholder_name,
+      cvv: card.cvv,
+      expiryDate: card.expiry_date,
+    };
   }
 
   async getCardTransactions(cardId: string): Promise<Card[]> {
-    const functions = getFirebaseFunctions();
-    const callable = httpsCallable<
-      { cardId: string; limit?: number },
-      { success: boolean; transactions: any[] }
-    >(functions, 'getPaymentCardTransactions');
-
-    const response = await callable({ cardId });
-    const data = normalizeCallableData<{ success: boolean; transactions: any[] }>(response.data);
-
-    if (!data.success) {
-      throw new Error('Não foi possível carregar as transações do cartão.');
-    }
-
     return [];
   }
 
   async deleteCard(cardId: string): Promise<void> {
-    const functions = getFirebaseFunctions();
-    const callable = httpsCallable<
-      { cardId: string },
-      { success: boolean }
-    >(functions, 'deletePaymentCard');
+    const db = await SQLiteDatabase.getInstance();
 
-    const response = await callable({ cardId });
-    const data = normalizeCallableData<{ success: boolean }>(response.data);
-
-    if (!data.success) {
-      throw new Error('Não foi possível excluir o cartão.');
-    }
+    await db.runAsync(
+      'UPDATE cards SET is_active = 0 WHERE id = ?',
+      [cardId]
+    );
   }
 }
-

@@ -1,14 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { updateProfile } from 'firebase/auth';
 import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react';
+
 import { ACCOUNT_DETAILS_STORAGE_KEY, AUTH_DELAY_MS } from '../../constants';
 import type { User } from '../../domain/entities/user.entity';
 import { GetCurrentUserUseCase } from '../../domain/use-cases/auth/get-current-user.use-case';
 import { SignInUseCase } from '../../domain/use-cases/auth/sign-in.use-case';
 import { SignOutUseCase } from '../../domain/use-cases/auth/sign-out.use-case';
 import { SignUpUseCase } from '../../domain/use-cases/auth/sign-up.use-case';
+import { AccountRepository } from '../../infrastructure/repositories/account.repository';
 import { AuthRepository } from '../../infrastructure/repositories/auth.repository';
-import { createBankAccount, getAccountDetails } from '../../infrastructure/services';
 
 interface AuthContextType {
   user: User | null;
@@ -34,6 +34,7 @@ interface AuthProviderProps {
 }
 
 const authRepository = new AuthRepository();
+const accountRepository = new AccountRepository();
 const signInUseCase = new SignInUseCase(authRepository);
 const signUpUseCase = new SignUpUseCase(authRepository);
 const signOutUseCase = new SignOutUseCase(authRepository);
@@ -161,36 +162,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (normalizedName) {
         try {
-          const firebaseAuth = await import('firebase/auth');
-          const { getFirebaseAuth } = await import('../../infrastructure/services/config/firebase');
-          const auth = getFirebaseAuth();
-          const currentUser = auth.currentUser;
-          if (currentUser) {
-            await updateProfile(currentUser, { displayName: normalizedName });
-          }
+          await authRepository.updateUserProfile(userCredential.uid, normalizedName);
         } catch (profileError) {
           console.warn('Não foi possível atualizar o nome do usuário:', profileError);
         }
       }
 
       try {
-        const callableResult = await createBankAccount({
+        const account = await accountRepository.createAccount({
           uid: userCredential.uid,
           ownerEmail: userCredential.email,
           ownerName: normalizedName || userCredential.email,
         });
-
-        const callableData = callableResult.data as {
-          success?: boolean;
-          message?: string;
-          accountNumber?: string;
-          agency?: string;
-          ownerName?: string;
-          balance?: number;
-        } | undefined;
-        if (callableData && callableData.success === false) {
-          throw new Error(callableData.message ?? 'Não foi possível criar a conta bancária.');
-        }
 
         const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -202,8 +185,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
           for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
-              const details = await getAccountDetails();
-              if (details?.success && details.accountNumber) {
+              const details = await accountRepository.getAccountDetails();
+              if (details && details.accountNumber) {
                 return details;
               }
             } catch (detailError) {
@@ -226,14 +209,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         const fallbackOwnerName =
           accountDetails.ownerName ??
-          callableData?.ownerName ??
+          account.ownerName ??
           (normalizedName || userCredential.email || '');
 
         const initialAccountDetails = {
           accountNumber: accountDetails.accountNumber,
-          agency: accountDetails.agency ?? callableData?.agency ?? '0001',
+          agency: accountDetails.agency ?? account.agency ?? '0001',
           ownerName: fallbackOwnerName,
-          balance: accountDetails.balance ?? callableData?.balance ?? 0,
+          balance: accountDetails.balance ?? account.balance ?? 0,
         };
 
         await AsyncStorage.setItem(
