@@ -1,8 +1,9 @@
-import { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import type { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import * as DocumentPicker from 'expo-document-picker';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import type { TransactionType } from '@/src/infrastructure/services';
+
 import {
   AmountInput,
   AttachmentField,

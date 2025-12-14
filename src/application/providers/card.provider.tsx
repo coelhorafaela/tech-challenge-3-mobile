@@ -1,4 +1,16 @@
-import React, { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  createContext,
+  startTransition,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useOptimistic,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
+
 import type { Card, CardType } from '../../domain/entities/card.entity';
 import { CreateCardUseCase } from '../../domain/use-cases/card/create-card.use-case';
 import { DeleteCardUseCase } from '../../domain/use-cases/card/delete-card.use-case';
@@ -9,7 +21,6 @@ import { useAuth } from './auth.provider';
 
 interface CardContextValue {
   cards: Card[];
-  loadingCards: boolean;
   creatingCard: boolean;
   deletingCardId: string | null;
   error: string | null;
@@ -30,11 +41,11 @@ const createCardUseCase = new CreateCardUseCase(cardRepository);
 const listCardsUseCase = new ListCardsUseCase(cardRepository);
 const deleteCardUseCase = new DeleteCardUseCase(cardRepository);
 
-export const CardProvider: React.FC<CardProviderProps> = ({ children }) => {
+export const CardProvider = ({ children }: CardProviderProps) => {
   const { isAuthenticated } = useAuth();
   const { account } = useAccount();
   const [cards, setCards] = useState<Card[]>([]);
-  const [loadingCards, setLoadingCards] = useState(false);
+  const [optimisticCards, setOptimisticCards] = useOptimistic(cards);
   const [creatingCard, setCreatingCard] = useState(false);
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +74,6 @@ export const CardProvider: React.FC<CardProviderProps> = ({ children }) => {
     }
 
     if (isMountedRef.current) {
-      setLoadingCards(true);
       setError(null);
     }
 
@@ -88,10 +98,6 @@ export const CardProvider: React.FC<CardProviderProps> = ({ children }) => {
 
       if (isMountedRef.current) {
         setError(cardsError?.message ?? 'Erro ao carregar cartões.');
-      }
-    } finally {
-      if (isMountedRef.current) {
-        setLoadingCards(false);
       }
     }
   }, [isAuthenticated, resetCards, account?.accountNumber]);
@@ -184,6 +190,10 @@ export const CardProvider: React.FC<CardProviderProps> = ({ children }) => {
         setDeletingCardId(cardId);
       }
 
+      startTransition(() => {
+        setOptimisticCards((previous) => previous.filter((card) => card.id !== cardId));
+      });
+
       try {
         await deleteCardUseCase.execute(cardId);
 
@@ -192,6 +202,9 @@ export const CardProvider: React.FC<CardProviderProps> = ({ children }) => {
         }
       } catch (deletionError: any) {
         console.error('Erro ao excluir cartão:', deletionError);
+        if (isMountedRef.current) {
+          setCards((previous) => [...previous]);
+        }
         throw new Error(
           deletionError?.message ?? 'Erro ao excluir cartão. Tente novamente mais tarde.'
         );
@@ -206,8 +219,7 @@ export const CardProvider: React.FC<CardProviderProps> = ({ children }) => {
 
   const value = useMemo<CardContextValue>(
     () => ({
-      cards,
-      loadingCards,
+      cards: optimisticCards,
       creatingCard,
       deletingCardId,
       error,
@@ -217,8 +229,7 @@ export const CardProvider: React.FC<CardProviderProps> = ({ children }) => {
       resetCards,
     }),
     [
-      cards,
-      loadingCards,
+      optimisticCards,
       creatingCard,
       deletingCardId,
       error,

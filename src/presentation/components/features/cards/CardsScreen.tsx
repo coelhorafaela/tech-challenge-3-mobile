@@ -1,3 +1,10 @@
+import { useFocusEffect } from '@react-navigation/native';
+import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, Animated, Dimensions, PanResponder, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import {
   CARD_TRANSACTIONS_PANEL,
   ROUTE_AUTH_LOGIN,
@@ -7,14 +14,8 @@ import type { CardType } from '@/src/domain/entities/card.entity';
 import { useAccount, useAuth, useCards } from '@/src/hooks';
 import type { PaymentCardType } from '@/src/infrastructure/services';
 import { getPaymentCardTransactions } from '@/src/infrastructure/services';
-import { useFocusEffect } from '@react-navigation/native';
-import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, Dimensions, PanResponder, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
 import type { TransactionItemProps } from '@/src/presentation';
+
 import {
   CardCarousel,
   CardDetails,
@@ -32,7 +33,6 @@ export function CardsScreen() {
   const { account } = useAccount();
   const {
     cards,
-    loadingCards,
     creatingCard,
     deletingCardId,
     error: cardsError,
@@ -86,7 +86,6 @@ export function CardsScreen() {
     if (activeCardIndex > cards.length - 1) {
       setActiveCardIndex(cards.length - 1);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cards.length]);
 
   const handleLogout = async () => {
@@ -387,11 +386,7 @@ export function CardsScreen() {
             <ErrorCard message={cardsError} onRetry={refreshCards} />
           ) : null}
 
-          {loadingCards ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color="#294FC1" />
-            </View>
-          ) : displayCards.length > 0 ? (
+          {displayCards.length > 0 ? (
             <>
               <CardCarousel
                 cards={displayCards}
@@ -476,4 +471,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-

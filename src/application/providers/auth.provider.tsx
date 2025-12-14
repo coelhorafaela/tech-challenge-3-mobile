@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from 'react';
 
 import { ACCOUNT_DETAILS_STORAGE_KEY, AUTH_DELAY_MS } from '../../constants';
 import type { User } from '../../domain/entities/user.entity';
@@ -40,7 +40,7 @@ const signUpUseCase = new SignUpUseCase(authRepository);
 const signOutUseCase = new SignOutUseCase(authRepository);
 const getCurrentUserUseCase = new GetCurrentUserUseCase(authRepository);
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const shouldPersistUserTokenRef = useRef(true);
