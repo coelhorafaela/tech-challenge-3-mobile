@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  ReactNode,
+  type ReactNode,
   createContext,
   useCallback,
   useContext,
@@ -24,9 +24,13 @@ interface AccountContextValue {
   clearAccount: () => Promise<void>;
 }
 
+interface AccountProviderProps {
+  children: ReactNode;
+}
+
 const AccountContext = createContext<AccountContextValue | undefined>(undefined);
 
-export const AccountProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AccountProvider = ({ children }: AccountProviderProps) => {
   const { isAuthenticated } = useAuth();
   const [account, setAccount] = useState<BankAccountDetails | null>(null);
   const [loadingAccount, setLoadingAccount] = useState(false);

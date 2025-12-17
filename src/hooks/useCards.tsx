@@ -30,6 +30,10 @@ interface CardContextValue {
   resetCards: () => void;
 }
 
+interface CardProviderProps {
+  children: ReactNode;
+}
+
 const CardContext = createContext<CardContextValue | undefined>(undefined);
 
 const getErrorCode = (error: unknown): string | undefined => {
@@ -55,7 +59,7 @@ const getErrorCode = (error: unknown): string | undefined => {
   return undefined;
 };
 
-export const CardProvider = ({ children }: { children: ReactNode }) => {
+export const CardProvider = ({ children }: CardProviderProps) => {
   const { isAuthenticated } = useAuth();
   const [cards, setCards] = useState<PaymentCard[]>([]);
   const [loadingCards, setLoadingCards] = useState(false);

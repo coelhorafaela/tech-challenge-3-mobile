@@ -1,5 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
+
 import { ACCOUNT_DETAILS_STORAGE_KEY } from '../../constants/storageKeys';
 import type { Account } from '../../domain/entities/account.entity';
 import { GetAccountDetailsUseCase } from '../../domain/use-cases/account/get-account-details.use-case';
@@ -23,7 +33,7 @@ interface AccountProviderProps {
 const accountRepository = new AccountRepository();
 const getAccountDetailsUseCase = new GetAccountDetailsUseCase(accountRepository);
 
-export const AccountProvider: React.FC<AccountProviderProps> = ({ children }) => {
+export const AccountProvider = ({ children }: AccountProviderProps) => {
   const { isAuthenticated } = useAuth();
   const [account, setAccount] = useState<Account | null>(null);
   const [loadingAccount, setLoadingAccount] = useState(false);

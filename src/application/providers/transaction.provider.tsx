@@ -1,4 +1,5 @@
-import React, { createContext, ReactNode, useCallback, useContext, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
+
 import type { Transaction, TransactionType } from '../../domain/entities/transaction.entity';
 import { CreateTransactionUseCase } from '../../domain/use-cases/transaction/create-transaction.use-case';
 import { GetAccountStatementUseCase } from '../../domain/use-cases/transaction/get-account-statement.use-case';
@@ -53,7 +54,7 @@ const getTransactionsUseCase = new GetTransactionsUseCase(transactionRepository)
 const getYearlyTransactionsUseCase = new GetYearlyTransactionsUseCase(transactionRepository);
 const getAccountStatementUseCase = new GetAccountStatementUseCase(transactionRepository);
 
-export const TransactionProvider: React.FC<TransactionProviderProps> = ({ children }) => {
+export const TransactionProvider = ({ children }: TransactionProviderProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
