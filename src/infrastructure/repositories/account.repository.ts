@@ -1,8 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import { CURRENT_USER_KEY } from '../../constants';
 import type { Account } from '../../domain/entities/account.entity';
 import type { AccountRepository as IAccountRepository } from '../../domain/repositories/account.repository';
+import { logger } from '../services/logger';
+import { secureStorage } from '../services/storage';
 import { SQLiteDatabase } from '../services/config/sqlite';
 
 export class AccountRepository implements IAccountRepository {
@@ -42,12 +42,17 @@ export class AccountRepository implements IAccountRepository {
 
   async getAccountDetails(): Promise<Account | null> {
     try {
-      const userJson = await AsyncStorage.getItem(CURRENT_USER_KEY);
+      const userJson = await secureStorage.getItem(CURRENT_USER_KEY);
       if (!userJson) {
         return null;
       }
       
-      const currentUser = JSON.parse(userJson);
+      let currentUser;
+      try {
+        currentUser = JSON.parse(userJson);
+      } catch (error) {
+        return null;
+      }
       const db = await SQLiteDatabase.getInstance();
       
       const account = await db.getFirstAsync<{
@@ -70,7 +75,7 @@ export class AccountRepository implements IAccountRepository {
         balance: account.balance,
       };
     } catch (error) {
-      console.error('Erro ao buscar detalhes da conta:', error);
+      logger.error('Erro ao buscar detalhes da conta', error);
       return null;
     }
   }

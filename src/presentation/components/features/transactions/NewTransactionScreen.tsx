@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTransactions } from '@/src/application/providers/transaction.provider';
 import type { TransactionType } from '@/src/domain/entities/transaction.entity';
 import { useAccount } from '@/src/hooks';
+import { logger } from '@/src/infrastructure/services/logger';
 import { formatCurrency } from '@/src/presentation/utils/currency';
 
 import { NewTransactionForm } from './NewTransactionForm';
@@ -182,7 +183,7 @@ export function NewTransactionScreen() {
         ]
       );
     } catch (error: any) {
-      console.error('Erro ao realizar transação:', error);
+      logger.error('Erro ao realizar transação', error);
       Alert.alert(
         'Erro',
         error?.message || 'Não foi possível realizar a transação. Tente novamente.'

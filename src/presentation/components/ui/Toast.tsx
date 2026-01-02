@@ -103,13 +103,15 @@ export default function Toast({
     <Animated.View
       style={{
         position: 'absolute',
-        top: 60,
+        top: 50,
         left: 20,
         right: 20,
-        zIndex: 9999,
+        zIndex: 10000,
+        elevation: 10,
         transform: [{ translateY }],
         opacity,
       }}
+      pointerEvents="box-none"
     >
       <View
         style={[

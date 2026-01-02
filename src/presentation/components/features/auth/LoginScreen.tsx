@@ -74,10 +74,14 @@ export function LoginScreen() {
       if (result.success) {
         showToast("Login realizado com sucesso!", "success");
       } else {
-        showToast(result.error || "Erro ao fazer login", "error");
+        const errorMessage = result.error || "Erro ao fazer login";
+        setTimeout(() => {
+          showToast(errorMessage, "error");
+        }, 100);
       }
-    } catch {
-      showToast("Erro inesperado. Tente novamente.", "error");
+    } catch (error: any) {
+      const errorMessage = error?.message || "Erro inesperado. Tente novamente.";
+      showToast(errorMessage, "error");
     }
   };
 
@@ -115,15 +119,16 @@ export function LoginScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
-      <StatusBar style="dark" />
-      <View style={styles.container}>
-        <Toast
-          visible={toastVisible}
-          message={toastMessage}
-          type={toastType}
-          onHide={hideToast}
-        />
+    <>
+      <Toast
+        visible={toastVisible}
+        message={toastMessage}
+        type={toastType}
+        onHide={hideToast}
+      />
+      <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
+        <StatusBar style="dark" />
+        <View style={styles.container}>
 
         <ScrollView
           contentContainerStyle={styles.scrollContent}
@@ -207,7 +212,8 @@ export function LoginScreen() {
           </View>
         </ScrollView>
       </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </>
   );
 }
 

@@ -6,6 +6,7 @@ import { GetAccountStatementUseCase } from '../../domain/use-cases/transaction/g
 import { GetTransactionsUseCase } from '../../domain/use-cases/transaction/get-transactions.use-case';
 import { GetYearlyTransactionsUseCase } from '../../domain/use-cases/transaction/get-yearly-transactions.use-case';
 import { TransactionRepository } from '../../infrastructure/repositories/transaction.repository';
+import { logger } from '../../infrastructure/services/logger';
 
 interface TransactionContextType {
   transactions: Transaction[];
@@ -96,7 +97,7 @@ export const TransactionProvider = ({ children }: TransactionProviderProps) => {
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar transações';
         setError(errorMessage);
-        console.error('Erro ao buscar transações:', err);
+        logger.error('Erro ao buscar transações', err);
         throw err;
       } finally {
         setLoading(false);

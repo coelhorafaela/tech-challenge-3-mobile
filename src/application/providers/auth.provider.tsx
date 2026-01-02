@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from 'react';
 
 import { ACCOUNT_DETAILS_STORAGE_KEY, AUTH_DELAY_MS } from '../../constants';
@@ -9,6 +8,8 @@ import { SignOutUseCase } from '../../domain/use-cases/auth/sign-out.use-case';
 import { SignUpUseCase } from '../../domain/use-cases/auth/sign-up.use-case';
 import { AccountRepository } from '../../infrastructure/repositories/account.repository';
 import { AuthRepository } from '../../infrastructure/repositories/auth.repository';
+import { logger } from '../../infrastructure/services/logger';
+import { secureStorage } from '../../infrastructure/services/storage';
 
 interface AuthContextType {
   user: User | null;
@@ -49,9 +50,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const persistUserToken = async (maybeUser: User | null) => {
     try {
       if (maybeUser && shouldPersistUserTokenRef.current) {
-        await AsyncStorage.setItem('userToken', maybeUser.uid);
+        await secureStorage.setItem('userToken', maybeUser.uid);
       } else {
-        await AsyncStorage.removeItem('userToken');
+        await secureStorage.removeItem('userToken');
       }
     } catch {
     }
@@ -80,7 +81,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
         setLoading(false);
       } catch (error) {
-        console.error('Erro ao configurar listener de autenticação:', error);
+        logger.error('Erro ao configurar listener de autenticação', error);
         setLoading(false);
       }
     };
@@ -112,7 +113,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return { success: true };
     } catch (error: any) {
       shouldPersistUserTokenRef.current = previousPersistence;
-      console.error('Erro no login:', error);
+      logger.error('Erro no login', error);
       
       let errorMessage = 'Erro ao fazer login';
       
@@ -137,6 +138,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
       } else {
         errorMessage = error.message || 'Erro ao fazer login';
+        
+        if (errorMessage.includes('Muitas tentativas de login')) {
+          errorMessage = errorMessage;
+        }
       }
       
       return { 
@@ -164,7 +169,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         try {
           await authRepository.updateUserProfile(userCredential.uid, normalizedName);
         } catch (profileError) {
-          console.warn('Não foi possível atualizar o nome do usuário:', profileError);
+          logger.warn('Não foi possível atualizar o nome do usuário', profileError);
         }
       }
 
@@ -219,20 +224,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           balance: accountDetails.balance ?? account.balance ?? 0,
         };
 
-        await AsyncStorage.setItem(
+        await secureStorage.setItem(
           ACCOUNT_DETAILS_STORAGE_KEY,
           JSON.stringify(initialAccountDetails)
         );
       } catch (bankAccountError: any) {
-        console.error('Erro ao criar conta bancária:', bankAccountError);
+        logger.error('Erro ao criar conta bancária', bankAccountError);
 
-        await AsyncStorage.removeItem('userToken');
-        await AsyncStorage.removeItem(ACCOUNT_DETAILS_STORAGE_KEY).catch(() => undefined);
+        await secureStorage.removeItem('userToken');
+        await secureStorage.removeItem(ACCOUNT_DETAILS_STORAGE_KEY).catch(() => undefined);
 
         try {
           await signOutUseCase.execute();
         } catch (signOutError) {
-          console.error('Erro ao desfazer cadastro após falha na criação da conta bancária:', signOutError);
+          logger.error('Erro ao desfazer cadastro após falha na criação da conta bancária', signOutError);
         }
 
         const formattedError = new Error(
@@ -243,11 +248,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
 
       setUser(userCredential);
-      await AsyncStorage.setItem('userToken', userCredential.uid);
+      await secureStorage.setItem('userToken', userCredential.uid);
       
       return { success: true };
     } catch (error: any) {
-      console.error('Erro no cadastro:', error);
+      logger.error('Erro no cadastro', error);
       let errorMessage = error.message || 'Erro ao criar conta';
 
       if (error.code) {
@@ -280,10 +285,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       await signOutUseCase.execute();
       setUser(null);
-      await AsyncStorage.removeItem('userToken');
-      await AsyncStorage.removeItem(ACCOUNT_DETAILS_STORAGE_KEY).catch(() => undefined);
+      await secureStorage.removeItem('userToken');
+      await secureStorage.removeItem(ACCOUNT_DETAILS_STORAGE_KEY).catch(() => undefined);
     } catch (error) {
-      console.error('Erro no logout:', error);
+      logger.error('Erro no logout', error);
     } finally {
       shouldPersistUserTokenRef.current = true;
     }

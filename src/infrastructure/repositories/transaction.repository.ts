@@ -1,8 +1,7 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import { CURRENT_USER_KEY } from '../../constants';
 import type { Transaction, TransactionType } from '../../domain/entities/transaction.entity';
 import type { TransactionRepository as ITransactionRepository } from '../../domain/repositories/transaction.repository';
+import { secureStorage } from '../services/storage';
 import { SQLiteDatabase } from '../services/config/sqlite';
 
 export class TransactionRepository implements ITransactionRepository {
@@ -16,12 +15,17 @@ export class TransactionRepository implements ITransactionRepository {
 
     let targetAccountNumber = accountNumber;
     if (!targetAccountNumber) {
-      const userJson = await AsyncStorage.getItem(CURRENT_USER_KEY);
+      const userJson = await secureStorage.getItem(CURRENT_USER_KEY);
       if (!userJson) {
         throw new Error('Usuário não autenticado');
       }
       
-      const currentUser = JSON.parse(userJson);
+      let currentUser;
+      try {
+        currentUser = JSON.parse(userJson);
+      } catch (error) {
+        throw new Error('Erro ao ler dados do usuário');
+      }
       const account = await db.getFirstAsync<{ account_number: string }>(
         'SELECT account_number FROM accounts WHERE user_id = ?',
         [currentUser.uid]
@@ -83,12 +87,17 @@ export class TransactionRepository implements ITransactionRepository {
 
     let targetAccountNumber = accountNumber;
     if (!targetAccountNumber) {
-      const userJson = await AsyncStorage.getItem(CURRENT_USER_KEY);
+      const userJson = await secureStorage.getItem(CURRENT_USER_KEY);
       if (!userJson) {
         return [];
       }
 
-      const currentUser = JSON.parse(userJson);
+      let currentUser;
+      try {
+        currentUser = JSON.parse(userJson);
+      } catch (error) {
+        return [];
+      }
       const account = await db.getFirstAsync<{ account_number: string }>(
         'SELECT account_number FROM accounts WHERE user_id = ?',
         [currentUser.uid]
@@ -141,12 +150,17 @@ export class TransactionRepository implements ITransactionRepository {
   }> {
     const db = await SQLiteDatabase.getInstance();
 
-    const userJson = await AsyncStorage.getItem(CURRENT_USER_KEY);
+    const userJson = await secureStorage.getItem(CURRENT_USER_KEY);
     if (!userJson) {
       return { year, months: [] };
     }
     
-    const currentUser = JSON.parse(userJson);
+    let currentUser;
+    try {
+      currentUser = JSON.parse(userJson);
+    } catch (error) {
+      return { year, months: [] };
+    }
     const account = await db.getFirstAsync<{ account_number: string }>(
       'SELECT account_number FROM accounts WHERE user_id = ?',
       [currentUser.uid]
@@ -214,7 +228,7 @@ export class TransactionRepository implements ITransactionRepository {
   }> {
     const db = await SQLiteDatabase.getInstance();
 
-    const userJson = await AsyncStorage.getItem(CURRENT_USER_KEY);
+    const userJson = await secureStorage.getItem(CURRENT_USER_KEY);
     if (!userJson) {
       return {
         success: false,
@@ -225,7 +239,18 @@ export class TransactionRepository implements ITransactionRepository {
       };
     }
     
-    const currentUser = JSON.parse(userJson);
+    let currentUser;
+    try {
+      currentUser = JSON.parse(userJson);
+    } catch (error) {
+      return {
+        success: false,
+        page: params?.page || 1,
+        pageSize: params?.pageSize || 20,
+        hasMore: false,
+        transactions: [],
+      };
+    }
     const account = await db.getFirstAsync<{ account_number: string }>(
       'SELECT account_number FROM accounts WHERE user_id = ?',
       [currentUser.uid]

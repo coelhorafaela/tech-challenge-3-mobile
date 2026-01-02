@@ -24,6 +24,7 @@ import {
   getAccountStatement,
   type AccountStatementEntry,
 } from "@/src/infrastructure/services";
+import { logger } from "@/src/infrastructure/services/logger";
 import { formatCurrency } from "@/src/presentation/utils/currency";
 
 const PAGE_SIZE = 10;
@@ -99,7 +100,7 @@ export function Statement() {
         setHasMore(response.hasMore);
         setError(null);
       } catch (err) {
-        console.error("Erro ao carregar extrato:", err);
+        logger.error("Erro ao carregar extrato", err);
         const message =
           err instanceof Error
             ? err.message

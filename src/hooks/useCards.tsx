@@ -16,6 +16,7 @@ import {
   deletePaymentCard,
   listPaymentCards,
 } from '../infrastructure/services';
+import { logger } from '../infrastructure/services/logger';
 import { useAuth } from './useAuth';
 
 interface CardContextValue {
@@ -118,7 +119,7 @@ export const CardProvider = ({ children }: CardProviderProps) => {
         return;
       }
 
-      console.error('Erro ao carregar cartões:', cardsError);
+      logger.error('Erro ao carregar cartões', cardsError);
 
       if (isMountedRef.current) {
         setError(cardsError?.message ?? 'Erro ao carregar cartões.');
@@ -187,7 +188,7 @@ export const CardProvider = ({ children }: CardProviderProps) => {
           );
         }
 
-        console.error('Erro ao criar cartão:', cardCreationError);
+        logger.error('Erro ao criar cartão', cardCreationError);
         throw new Error(
           cardCreationError?.message ?? 'Erro ao criar cartão. Tente novamente mais tarde.'
         );
@@ -225,7 +226,7 @@ export const CardProvider = ({ children }: CardProviderProps) => {
           setCards((previous) => previous.filter((card) => card.id !== cardId));
         }
       } catch (deletionError: any) {
-        console.error('Erro ao excluir cartão:', deletionError);
+        logger.error('Erro ao excluir cartão', deletionError);
         throw new Error(
           deletionError?.message ?? 'Erro ao excluir cartão. Tente novamente mais tarde.'
         );

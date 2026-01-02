@@ -1,4 +1,5 @@
 import { getAccountStatementSimple, type Transaction } from '@/src/infrastructure/services';
+import { logger } from '@/src/infrastructure/services/logger';
 import { useEffect, useState } from 'react';
 
 type MonthlyData = {
@@ -22,7 +23,7 @@ export function useTransactions(accountNumber?: string) {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar transações');
-      console.error('Erro ao buscar transações:', err);
+      logger.error('Erro ao buscar transações', err);
     } finally {
       setLoading(false);
     }

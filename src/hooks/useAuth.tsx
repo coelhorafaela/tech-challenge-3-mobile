@@ -12,6 +12,7 @@ import { ACCOUNT_DETAILS_STORAGE_KEY, AUTH_DELAY_MS } from '../constants';
 import type { User } from '../domain/entities/user.entity';
 import { AccountRepository } from '../infrastructure/repositories/account.repository';
 import { AuthRepository } from '../infrastructure/repositories/auth.repository';
+import { logger } from '../infrastructure/services/logger';
 
 const authRepository = new AuthRepository();
 const accountRepository = new AccountRepository();
@@ -80,7 +81,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
         setLoading(false);
       } catch (error) {
-        console.error('Erro ao configurar listener de autenticação:', error);
+        logger.error('Erro ao configurar listener de autenticação', error);
         setLoading(false);
       }
     };
@@ -112,7 +113,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return { success: true };
     } catch (error: any) {
       shouldPersistUserTokenRef.current = previousPersistence;
-      console.error('Erro no login:', error);
+      logger.error('Erro no login', error);
       
       let errorMessage = error.message || 'Erro ao fazer login';
       
@@ -141,7 +142,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         try {
           await authRepository.updateUserProfile(userCredential.uid, normalizedName);
         } catch (profileError) {
-          console.warn('Não foi possível atualizar o nome do usuário:', profileError);
+          logger.warn('Não foi possível atualizar o nome do usuário', profileError);
         }
       }
 
@@ -201,7 +202,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           JSON.stringify(initialAccountDetails)
         );
       } catch (bankAccountError: any) {
-        console.error('Erro ao criar conta bancária:', bankAccountError);
+        logger.error('Erro ao criar conta bancária', bankAccountError);
 
         await AsyncStorage.removeItem('userToken');
         await AsyncStorage.removeItem(ACCOUNT_DETAILS_STORAGE_KEY).catch(() => undefined);
@@ -209,7 +210,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         try {
           await authRepository.signOut();
         } catch (signOutError) {
-          console.error('Erro ao desfazer cadastro após falha na criação da conta bancária:', signOutError);
+          logger.error('Erro ao desfazer cadastro após falha na criação da conta bancária', signOutError);
         }
 
         const formattedError = new Error(
@@ -224,7 +225,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       return { success: true };
     } catch (error: any) {
-      console.error('Erro no cadastro:', error);
+      logger.error('Erro no cadastro', error);
       let errorMessage = error.message || 'Erro ao criar conta';
 
       return { 
@@ -244,7 +245,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       await AsyncStorage.removeItem('userToken');
       await AsyncStorage.removeItem(ACCOUNT_DETAILS_STORAGE_KEY).catch(() => undefined);
     } catch (error) {
-      console.error('Erro no logout:', error);
+      logger.error('Erro no logout', error);
     } finally {
       shouldPersistUserTokenRef.current = true;
     }

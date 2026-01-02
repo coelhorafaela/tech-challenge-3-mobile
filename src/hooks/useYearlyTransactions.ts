@@ -1,4 +1,5 @@
 import { getYearlyTransactions, type Transaction, type YearlyTransactionsResponse } from '@/src/infrastructure/services';
+import { logger } from '@/src/infrastructure/services/logger';
 import { useEffect, useState } from 'react';
 
 type MonthlyData = {
@@ -24,7 +25,7 @@ export function useYearlyTransactions(year?: number) {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar transações anuais');
-      console.error('Erro ao buscar transações anuais:', err);
+      logger.error('Erro ao buscar transações anuais', err);
     } finally {
       setLoading(false);
     }

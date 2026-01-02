@@ -12,6 +12,7 @@ import {
 } from '@/src/constants';
 import type { CardType } from '@/src/domain/entities/card.entity';
 import { useAccount, useAuth, useCards } from '@/src/hooks';
+import { logger } from '@/src/infrastructure/services/logger';
 import type { PaymentCardType } from '@/src/infrastructure/services';
 import { getPaymentCardTransactions } from '@/src/infrastructure/services';
 import type { TransactionItemProps } from '@/src/presentation';
@@ -138,7 +139,7 @@ export function CardsScreen() {
           setCardTransactions(normalized);
         }
       } catch (transactionError: any) {
-        console.error('Erro ao carregar transações do cartão:', transactionError);
+        logger.error('Erro ao carregar transações do cartão', transactionError);
 
         if (isMountedRef.current) {
           setTransactionsError(
