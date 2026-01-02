@@ -1,14 +1,26 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import { CURRENT_USER_KEY } from '../../constants';
 import type { User } from '../../domain/entities/user.entity';
 import type { AuthRepository as IAuthRepository } from '../../domain/repositories/auth.repository';
+import { passwordHashService } from '../services/crypto';
+import { rateLimiter } from '../services/rate-limiter';
+import { secureStorage } from '../services/storage';
 import { SQLiteDatabase } from '../services/config/sqlite';
 
 export class AuthRepository implements IAuthRepository {
   private authStateListeners: Array<(user: User | null) => void> = [];
 
   async signIn(email: string, password: string): Promise<User> {
+    const rateLimitCheck = await rateLimiter.checkRateLimit(email);
+    
+    if (!rateLimitCheck.allowed) {
+      if (rateLimitCheck.blockedUntil) {
+        const blockedUntilDate = new Date(rateLimitCheck.blockedUntil);
+        const minutesRemaining = Math.ceil((rateLimitCheck.blockedUntil - Date.now()) / 60000);
+        throw new Error(`Muitas tentativas de login. Tente novamente em ${minutesRemaining} minuto(s).`);
+      }
+      throw new Error('Muitas tentativas de login. Tente novamente mais tarde.');
+    }
+
     const db = await SQLiteDatabase.getInstance();
     
     const user = await db.getFirstAsync<{
@@ -17,11 +29,21 @@ export class AuthRepository implements IAuthRepository {
       name: string;
       password: string;
       created_at: number;
-    }>('SELECT * FROM users WHERE email = ? AND password = ?', [email, password]);
+    }>('SELECT * FROM users WHERE email = ?', [email]);
 
     if (!user) {
+      await rateLimiter.recordAttempt(email);
       throw new Error('Credenciais inválidas');
     }
+
+    const isPasswordValid = await passwordHashService.verifyPassword(password, user.password);
+    
+    if (!isPasswordValid) {
+      await rateLimiter.recordAttempt(email);
+      throw new Error('Credenciais inválidas');
+    }
+
+    await rateLimiter.resetRateLimit(email);
 
     const authenticatedUser: User = {
       uid: user.id,
@@ -30,7 +52,7 @@ export class AuthRepository implements IAuthRepository {
       emailVerified: false,
     };
 
-    await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(authenticatedUser));
+    await secureStorage.setItem(CURRENT_USER_KEY, JSON.stringify(authenticatedUser));
 
     this.authStateListeners.forEach(listener => listener(authenticatedUser));
 
@@ -51,10 +73,11 @@ export class AuthRepository implements IAuthRepository {
 
     const userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     const createdAt = Date.now();
+    const hashedPassword = await passwordHashService.hashPassword(password);
 
     await db.runAsync(
       'INSERT INTO users (id, email, name, password, created_at) VALUES (?, ?, ?, ?, ?)',
-      [userId, email, email.split('@')[0], password, createdAt]
+      [userId, email, email.split('@')[0], hashedPassword, createdAt]
     );
 
     const newUser: User = {
@@ -64,7 +87,7 @@ export class AuthRepository implements IAuthRepository {
       emailVerified: false,
     };
 
-    await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+    await secureStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
 
     this.authStateListeners.forEach(listener => listener(newUser));
 
@@ -72,14 +95,14 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async signOut(): Promise<void> {
-    await AsyncStorage.removeItem(CURRENT_USER_KEY);
+    await secureStorage.removeItem(CURRENT_USER_KEY);
 
     this.authStateListeners.forEach(listener => listener(null));
   }
 
   async getCurrentUser(): Promise<User | null> {
     try {
-      const userJson = await AsyncStorage.getItem(CURRENT_USER_KEY);
+      const userJson = await secureStorage.getItem(CURRENT_USER_KEY);
       if (!userJson) {
         return null;
       }
@@ -113,7 +136,7 @@ export class AuthRepository implements IAuthRepository {
     const currentUser = await this.getCurrentUser();
     if (currentUser && currentUser.uid === uid) {
       const updatedUser = { ...currentUser, displayName };
-      await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+      await secureStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
       this.authStateListeners.forEach(listener => listener(updatedUser));
     }
   }

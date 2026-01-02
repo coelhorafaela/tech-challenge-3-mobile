@@ -1,4 +1,9 @@
 import * as SQLite from 'expo-sqlite';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { passwordHashService } from '../crypto';
+import { logger } from '../logger';
+
+const MIGRATION_KEY = '@techchallenge3:password_migration_completed';
 
 export class SQLiteDatabase {
   private static instance: SQLite.SQLiteDatabase | null = null;
@@ -9,8 +14,59 @@ export class SQLiteDatabase {
     if (!this.instance) {
       this.instance = await SQLite.openDatabaseAsync('techchallenge3.db');
       await this.initializeTables();
+      await this.migratePasswords();
     }
     return this.instance;
+  }
+
+  private static async migratePasswords(): Promise<void> {
+    try {
+      const migrationCompleted = await AsyncStorage.getItem(MIGRATION_KEY);
+      if (migrationCompleted === 'true') {
+        return;
+      }
+
+      const db = this.instance;
+      if (!db) return;
+
+      const users = await db.getAllAsync<{
+        id: string;
+        email: string;
+        password: string;
+      }>('SELECT id, email, password FROM users');
+
+      if (users.length === 0) {
+        await AsyncStorage.setItem(MIGRATION_KEY, 'true');
+        return;
+      }
+
+      let migratedCount = 0;
+
+      for (const user of users) {
+        if (passwordHashService.isHashed(user.password)) {
+          continue;
+        }
+
+        try {
+          const hashedPassword = await passwordHashService.hashPassword(user.password);
+          await db.runAsync('UPDATE users SET password = ? WHERE id = ?', [
+            hashedPassword,
+            user.id,
+          ]);
+          migratedCount++;
+        } catch (error) {
+          logger.error(`Erro ao migrar senha do usuário ${user.id}`, error);
+        }
+      }
+
+      if (migratedCount > 0) {
+        logger.info(`Migração de senhas concluída: ${migratedCount} usuário(s) migrado(s)`);
+      }
+
+      await AsyncStorage.setItem(MIGRATION_KEY, 'true');
+    } catch (error) {
+      logger.error('Erro durante migração de senhas', error);
+    }
   }
 
   private static async initializeTables(): Promise<void> {

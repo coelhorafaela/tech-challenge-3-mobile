@@ -14,6 +14,7 @@ import { ACCOUNT_DETAILS_STORAGE_KEY } from '../../constants/storageKeys';
 import type { Account } from '../../domain/entities/account.entity';
 import { GetAccountDetailsUseCase } from '../../domain/use-cases/account/get-account-details.use-case';
 import { AccountRepository } from '../../infrastructure/repositories/account.repository';
+import { logger } from '../../infrastructure/services/logger';
 import { useAuth } from './auth.provider';
 
 interface AccountContextValue {
@@ -60,7 +61,7 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
         balance: details.balance,
       }));
     } catch (storageError) {
-      console.warn('Não foi possível persistir os dados da conta:', storageError);
+      logger.warn('Não foi possível persistir os dados da conta', storageError);
     }
   }, []);
 
@@ -87,7 +88,7 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
         return accountEntity;
       }
     } catch (storageError) {
-      console.warn('Não foi possível carregar os dados da conta armazenados:', storageError);
+      logger.warn('Não foi possível carregar os dados da conta armazenados', storageError);
     }
 
     return null;
@@ -117,18 +118,24 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
       const accountDetails = await getAccountDetailsUseCase.execute();
 
       if (!accountDetails) {
-        throw new Error('Não foi possível obter os dados da conta.');
+        if (isMountedRef.current) {
+          setError('Conta não encontrada. Por favor, faça login novamente.');
+          setAccount(null);
+        }
+        return;
       }
 
       if (isMountedRef.current) {
         setAccount(accountDetails);
+        setError(null);
       }
 
       await persistAccount(accountDetails);
     } catch (accountError: any) {
-      console.error('Erro ao buscar detalhes da conta:', accountError);
+      logger.error('Erro ao buscar detalhes da conta', accountError);
       if (isMountedRef.current) {
         setError(accountError?.message ?? 'Erro ao buscar detalhes da conta.');
+        setAccount(null);
       }
     } finally {
       if (isMountedRef.current) {

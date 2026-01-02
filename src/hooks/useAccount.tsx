@@ -12,6 +12,7 @@ import {
 
 import { ACCOUNT_DETAILS_STORAGE_KEY } from '../constants/storageKeys';
 import { type GetAccountDetailsResponse, getAccountDetails } from '../infrastructure/services';
+import { logger } from '../infrastructure/services/logger';
 import { useAuth } from './useAuth';
 
 type BankAccountDetails = Omit<GetAccountDetailsResponse, 'success'>;
@@ -52,7 +53,7 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 
       await AsyncStorage.setItem(ACCOUNT_DETAILS_STORAGE_KEY, JSON.stringify(details));
     } catch (storageError) {
-      console.warn('Não foi possível persistir os dados da conta:', storageError);
+      logger.warn('Não foi possível persistir os dados da conta', storageError);
     }
   }, []);
 
@@ -67,7 +68,7 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
         return parsed;
       }
     } catch (storageError) {
-      console.warn('Não foi possível carregar os dados da conta armazenados:', storageError);
+      logger.warn('Não foi possível carregar os dados da conta armazenados', storageError);
     }
 
     return null;
@@ -108,7 +109,7 @@ export const AccountProvider = ({ children }: AccountProviderProps) => {
 
       await persistAccount(details);
     } catch (accountError: any) {
-      console.error('Erro ao buscar detalhes da conta:', accountError);
+      logger.error('Erro ao buscar detalhes da conta', accountError);
       if (isMountedRef.current) {
         setError(accountError?.message ?? 'Erro ao buscar detalhes da conta.');
       }
