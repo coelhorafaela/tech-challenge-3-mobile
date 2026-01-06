@@ -1,9 +1,10 @@
-import * as SQLite from 'expo-sqlite';
+import { MIGRATION_KEY } from '@/src/constants/storageKeys';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SQLite from 'expo-sqlite';
 import { passwordHashService } from '../crypto';
 import { logger } from '../logger';
 
-const MIGRATION_KEY = '@techchallenge3:password_migration_completed';
+
 
 export class SQLiteDatabase {
   private static instance: SQLite.SQLiteDatabase | null = null;

@@ -1,3 +1,4 @@
+import { RATE_LIMIT_STORAGE_PREFIX } from '@/src/constants/storageKeys';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface RateLimitEntry {
@@ -6,7 +7,7 @@ interface RateLimitEntry {
   blockedUntil?: number;
 }
 
-const RATE_LIMIT_STORAGE_PREFIX = '@techchallenge3:rate_limit:';
+  
 const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 15 * 60 * 1000;
 const BLOCK_DURATION_MS = 30 * 60 * 1000;

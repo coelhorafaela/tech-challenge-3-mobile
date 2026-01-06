@@ -1,7 +1,8 @@
-import * as Crypto from 'expo-crypto';
+import { ENCRYPTION_KEY_STORAGE } from '@/src/constants/storageKeys';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Crypto from 'expo-crypto';
 
-const ENCRYPTION_KEY_STORAGE = '@techchallenge3:encryption_key';
+
 
 class EncryptionService {
   private encryptionKey: string | null = null;
