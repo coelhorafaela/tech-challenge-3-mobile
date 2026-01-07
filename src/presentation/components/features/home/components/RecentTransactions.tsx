@@ -8,6 +8,7 @@ import {
 
 import { useTransactions } from "@/src/application/providers/transaction.provider";
 import type { Transaction } from "@/src/domain/entities/transaction.entity";
+import { logger } from "@/src/infrastructure/services/logger";
 import {
   SegmentControl,
   TransactionItem as TransactionItemComponent,
@@ -103,7 +104,7 @@ export function RecentTransactions() {
           ),
         );
       } catch (err) {
-        console.error("Erro ao carregar transações recentes:", err);
+        logger.error("Erro ao carregar transações recentes", err);
         if (!isMounted) {
           return;
         }

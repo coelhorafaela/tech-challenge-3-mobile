@@ -1,3 +1,5 @@
+import { sanitizer } from '../../infrastructure/services/sanitizer';
+
 export interface ValidationResult {
   isValid: boolean;
   message?: string;
@@ -8,7 +10,8 @@ export const validateName = (name: string): ValidationResult => {
     return { isValid: false, message: 'Nome é obrigatório' };
   }
 
-  const trimmed = name.trim();
+  const sanitized = sanitizer.sanitizeName(name);
+  const trimmed = sanitized.trim();
 
   if (!trimmed) {
     return { isValid: false, message: 'Nome não pode estar vazio' };
@@ -30,12 +33,13 @@ export const validateEmail = (email: string): ValidationResult => {
     return { isValid: false, message: 'Email é obrigatório' };
   }
 
-  if (!email.trim()) {
+  const sanitized = sanitizer.sanitizeEmail(email);
+  if (!sanitized.trim()) {
     return { isValid: false, message: 'Email não pode estar vazio' };
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
+  if (!emailRegex.test(sanitized)) {
     return { isValid: false, message: 'Email inválido' };
   }
 

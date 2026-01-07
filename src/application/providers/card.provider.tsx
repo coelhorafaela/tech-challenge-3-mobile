@@ -16,6 +16,7 @@ import { CreateCardUseCase } from '../../domain/use-cases/card/create-card.use-c
 import { DeleteCardUseCase } from '../../domain/use-cases/card/delete-card.use-case';
 import { ListCardsUseCase } from '../../domain/use-cases/card/list-cards.use-case';
 import { CardRepository } from '../../infrastructure/repositories/card.repository';
+import { logger } from '../../infrastructure/services/logger';
 import { useAccount } from './account.provider';
 import { useAuth } from './auth.provider';
 
@@ -94,7 +95,7 @@ export const CardProvider = ({ children }: CardProviderProps) => {
         return;
       }
 
-      console.error('Erro ao carregar cartões:', cardsError);
+      logger.error('Erro ao carregar cartões', cardsError);
 
       if (isMountedRef.current) {
         setError(cardsError?.message ?? 'Erro ao carregar cartões.');
@@ -163,7 +164,7 @@ export const CardProvider = ({ children }: CardProviderProps) => {
           );
         }
 
-        console.error('Erro ao criar cartão:', cardCreationError);
+        logger.error('Erro ao criar cartão', cardCreationError);
         throw new Error(
           cardCreationError?.message ?? 'Erro ao criar cartão. Tente novamente mais tarde.'
         );
@@ -201,7 +202,7 @@ export const CardProvider = ({ children }: CardProviderProps) => {
           setCards((previous) => previous.filter((card) => card.id !== cardId));
         }
       } catch (deletionError: any) {
-        console.error('Erro ao excluir cartão:', deletionError);
+        logger.error('Erro ao excluir cartão', deletionError);
         if (isMountedRef.current) {
           setCards((previous) => [...previous]);
         }

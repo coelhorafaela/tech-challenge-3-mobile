@@ -1,5 +1,6 @@
 import type { Card, CardType } from '../../domain/entities/card.entity';
 import type { CardRepository as ICardRepository } from '../../domain/repositories/card.repository';
+import { encryptionService } from '../services/encryption';
 import { SQLiteDatabase } from '../services/config/sqlite';
 
 const generateCardNumber = (type: CardType): string => {
@@ -42,18 +43,21 @@ export class CardRepository implements ICardRepository {
     const brand = getCardBrand(params.cardType);
     const createdAt = Date.now();
 
+    const encryptedCardNumber = await encryptionService.encryptCardNumber(cardNumber);
+    const encryptedCVV = await encryptionService.encryptCVV(cvv);
+
     await db.runAsync(
       'INSERT INTO cards (id, account_number, card_number, card_type, cardholder_name, cvv, expiry_date, brand, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [cardId, params.accountNumber, cardNumber, params.cardType, params.cardholderName, cvv, expiryDate, brand, 1, createdAt]
+      [cardId, params.accountNumber, encryptedCardNumber, params.cardType, params.cardholderName, encryptedCVV, expiryDate, brand, 1, createdAt]
     );
 
     return {
       id: cardId,
       accountNumber: params.accountNumber,
-      cardNumber,
+      cardNumber: encryptionService.maskCardNumber(cardNumber),
       cardType: params.cardType,
       cardholderName: params.cardholderName,
-      cvv,
+      cvv: encryptionService.maskCVV(),
       expiryDate,
     };
   }
@@ -86,10 +90,10 @@ export class CardRepository implements ICardRepository {
     return cards.map(card => ({
       id: card.id,
       accountNumber: card.account_number,
-      cardNumber: card.card_number,
+      cardNumber: encryptionService.maskCardNumber(card.card_number),
       cardType: card.card_type as CardType,
       cardholderName: card.cardholder_name,
-      cvv: card.cvv,
+      cvv: encryptionService.maskCVV(),
       expiryDate: card.expiry_date,
     }));
   }
@@ -116,10 +120,10 @@ export class CardRepository implements ICardRepository {
     return {
       id: card.id,
       accountNumber: card.account_number,
-      cardNumber: card.card_number,
+      cardNumber: encryptionService.maskCardNumber(card.card_number),
       cardType: card.card_type as CardType,
       cardholderName: card.cardholder_name,
-      cvv: card.cvv,
+      cvv: encryptionService.maskCVV(),
       expiryDate: card.expiry_date,
     };
   }
